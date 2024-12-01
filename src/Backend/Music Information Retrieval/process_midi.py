@@ -47,9 +47,6 @@ def process_midi(file_path, window_size=40, sliding_step=8):
 
 
 def find_active_channels(file_path):
-    """
-    Deteksi channel aktif dalam file MIDI.
-    """
     midi_file = mido.MidiFile(file_path)
     active_channels = set()
     for track in midi_file.tracks:
