@@ -3,15 +3,23 @@ from PIL import Image
 
 # Loads and process image into a 1D list of grayscale values
 def load_and_process(image_path):
-    # Load image
+    # Load image and convert the pixels into the RGB format
     img = Image.open(image_path).convert("RGB")
     # Convert image to NumPy array
     img_array = np.array(img)
-    # Calculate grayscale values
+    # Calculate grayscale values using I(x,y) = 0.2989.R(x,y) + 0.5870.G(x,y) + 0.1140.B(x,y)
     grayscale_values = (
         0.2989 * img_array[:, :, 0] +  # Red 
         0.5870 * img_array[:, :, 1] +  # Green 
         0.1140 * img_array[:, :, 2]    # Blue 
     )
-    # Return flatten the 2D grayscale array into a 1D array
+    # Return flattened 2D grayscale array (1D array)
     return grayscale_values.flatten()
+
+# Driver
+def main():
+    grayscale_values = load_and_process("src/Backend/Album Picture Finder/test.png")
+    print(grayscale_values)
+
+if __name__ == "__main__":
+    main()
