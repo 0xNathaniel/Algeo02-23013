@@ -43,7 +43,7 @@ def process_midi(file_path, window_size=40, sliding_step=8):
         converted_notes = (melody_notes[i][0] - dev_notes_list_mean) / dev_notes
         process_midi_result.append((converted_notes, melody_notes[i][1]))
         
-    return process_midi_result
+    return process_midi_result, dev_notes_list_mean, dev_notes
 
 
 def find_active_channels(file_path):
