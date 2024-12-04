@@ -18,5 +18,7 @@ def load_and_process(image_path):
 
 # Driver
 if __name__ == "__main__":
-    grayscale_values = load_and_process("src/Backend/Album Picture Finder/test.png")
+    directory = ""
+    file_name = input("Test image file name: ")
+    grayscale_values = load_and_process(directory + file_name)
     print(grayscale_values)

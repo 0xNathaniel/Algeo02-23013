@@ -22,5 +22,5 @@ if __name__ == "__main__":
     # Standardize the grayscale values
     standardized_values = standardize(grayscale_values)
 
-    print("\nStandardized Grayscale Values:")
+    print("Standardized Grayscale Values:")
     print(standardized_values)
