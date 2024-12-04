@@ -2,12 +2,12 @@ import numpy as np
 
 # Create and return a covariance matrix of image's standardized grayscale values
 def create_covariance(standardized_values):
+    standardized_values = standardized_values.reshape(1, -1)
     return (1 / standardized_values.shape[0]) * np.dot(standardized_values.T, standardized_values)
 
-# Perform SVD using eigen decomposition and return the eigen vector matrix needed for projection
+# Perform SVD and return the eigen vector matrix
 def svd(covariance_matrix):
-    eigenvalues = find_eigenvalues(covariance_matrix)
-    eigenvector_matrix = compute_eigenvectors(covariance_matrix, eigenvalues)
+    eigenvector_matrix, _, _ = np.linalg.svd(covariance_matrix)
     return eigenvector_matrix
 
 # Select principal components (n_components)
@@ -16,40 +16,43 @@ def pca(eigenvector_matrix, n_components):
 
 # Project data onto principal components
 def project(principal_components, standardized_values):
-    principal_components = np.repeat(principal_components, len(standardized_values))
-
     return np.dot(standardized_values, principal_components)
 
-# Full PCA pipeline
+# Full PCA using SVD pipeline
 def pca_pipeline(standardized_values, n_components):
     covariance_matrix = create_covariance(standardized_values)
     eigenvector_matrix = svd(covariance_matrix)
     principal_components = pca(eigenvector_matrix, n_components)
     return project(principal_components, standardized_values)
 
-def find_eigenvalues(scalar_covariance):
-    return [scalar_covariance]
-
-# Compute eigenvectors
-def compute_eigenvectors(scalar_covariance, eigenvalues):
-    return np.array([[1.0]])
-
-# Custom vector normalization
-def vector_normalization(vector):
-    squared_sum = sum(v ** 2 for v in vector)
-    return squared_sum ** 0.5
-
 # Driver
 if __name__ == "__main__":
-    # Example standardized data
-    standardized_values = np.array([1.0, 2.0, 3.0])
-    
-    covariance = create_covariance(standardized_values)
-    print(covariance)
-    
-    # Perform PCA
     n_components = 2
-    projected = pca_pipeline(standardized_values, n_components)
     
+    # Example of standardized data as test input
+    standardized_values = np.array([100, 120, 130, 140, 150])
+    
+    # create_covariance test
+    covariance_matrix = create_covariance(standardized_values)
+    print("Covariance Matrix:")
+    print(covariance_matrix)
+    
+    # svd test
+    eigenvector_matrix = svd(covariance_matrix)
+    print("Eigenvector Matrix:")
+    print(eigenvector_matrix)
+    
+    # pca test
+    principal_components = pca(eigenvector_matrix, n_components)
+    print("Principal Components")
+    print(principal_components)
+    
+    # project test
+    projected = project(principal_components, standardized_values)
     print("Projected Data:")
     print(projected)
+    
+    #pca_pipeline test
+    projected_pipeline = pca_pipeline(standardized_values, n_components)
+    print("Projected Data Using Pipeline:")
+    print(projected_pipeline)
