@@ -1,17 +1,24 @@
+import numpy as np
 from PIL import Image
 
+# Loads and process image into a 1D list of grayscale values
 def load_and_process(image_path):
-    img = Image.open(image_path).convert("RGB)")
-    
-    width, height = img.size
-    
-    grayscale_values = []
-    
-    for x in range(width):
-        for y in range(height):
-            r, g, b = img.getpixel((x, y))
-            grayscale = 0.2989 * r + 0.5870 * g + 0.1140 * b
-            grayscale_values.append(grayscale)
-            
-    return grayscale_values
-            
+    # Load image and convert the pixels into the RGB format
+    img = Image.open(image_path).convert("RGB")
+    # Convert image to NumPy array
+    img_array = np.array(img)
+    # Calculate grayscale values using I(x,y) = 0.2989.R(x,y) + 0.5870.G(x,y) + 0.1140.B(x,y)
+    grayscale_values = (
+        0.2989 * img_array[:, :, 0] +  # Red 
+        0.5870 * img_array[:, :, 1] +  # Green 
+        0.1140 * img_array[:, :, 2]    # Blue 
+    )
+    # Return flattened 2D grayscale array (1D array)
+    return grayscale_values.flatten()
+
+# Driver
+if __name__ == "__main__":
+    directory = ""
+    file_name = input("Test image file name: ")
+    grayscale_values = load_and_process(directory + file_name)
+    print(grayscale_values)
