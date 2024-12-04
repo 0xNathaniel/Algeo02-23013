@@ -13,7 +13,7 @@ def standardize(grayscale_values):
     return standardized_values
 
 # Driver
-def main():
+if __name__ == "__main__":
     grayscale_values = np.array([120, 125, 130])
 
     print("Original Grayscale Values:")
@@ -24,6 +24,3 @@ def main():
 
     print("\nStandardized Grayscale Values:")
     print(standardized_values)
-
-if __name__ == "__main__":
-    main()
