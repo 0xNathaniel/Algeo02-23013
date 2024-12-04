@@ -8,43 +8,32 @@ import numpy as np
 
 # Number of principal components for PCA
 n_components = 5
+n_images = 5  # Top N most similar images to store
 
 def main():
-    # Directory containing the images
     directory = "src/Backend/Album Picture Finder/Album Pictures"
-    # Query image path (image to compare against others)
-    query_image_path = os.path.join(directory, "0.jpg")
-    #List all image files in the directory
+    query_image_name = "0.jpg"
+    query_image_path = os.path.join(directory, query_image_name)
     image_files = [f for f in os.listdir(directory) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-    #Process query image
     projected_query = process_query_image(query_image_path, n_components)
-    #Track the most similar image
-    min_distance = float('inf')
-    most_similar_image = None
 
+    similarity_list = []
+
+    # Process each image and calculate the similarity
     for image_file in image_files:
-        # Skip the query image itself
-        #if image_file == os.path.basename(query_image_path):
-            #continue
-
-        # Full path of the image
         image_path = os.path.join(directory, image_file)
-
-        # Process the image
         grayscale_values = load_and_process(image_path)
         standardized_values = standardize(grayscale_values)
         projected_image = pca_pipeline(standardized_values, n_components)
-
-        # Calculate similarity (distance)
         similarity = calculate_similarity(projected_query, projected_image)
+        similarity_list.append((similarity, image_file))
 
-        # Check if this is the most similar image
-        if similarity < min_distance:
-            min_distance = similarity
-            most_similar_image = image_file
+    similarity_list.sort(key=lambda x: x[0])
+    top_n_images = similarity_list[:n_images]
 
-    # Output the file name with the lowest distance
-    print(f"The most similar image to {query_image_path} is {most_similar_image} with a distance of {min_distance}")
+    print(f"Top {n_images} most similar images to {query_image_path}:")
+    for rank, (similarity, image_file) in enumerate(top_n_images, start=1):
+        print(f"{rank}. {image_file} with similarity (distance) of {similarity}")
 
 if __name__ == "__main__":
     main()
