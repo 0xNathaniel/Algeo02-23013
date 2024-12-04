@@ -17,9 +17,6 @@ def load_and_process(image_path):
     return grayscale_values.flatten()
 
 # Driver
-def main():
+if __name__ == "__main__":
     grayscale_values = load_and_process("src/Backend/Album Picture Finder/test.png")
     print(grayscale_values)
-
-if __name__ == "__main__":
-    main()
