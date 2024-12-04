@@ -2,11 +2,11 @@ import numpy as np
 
 # Create and return a covariance matrix of image's standardized grayscale values
 def create_covariance(standardized_values):
-    standardized_values = standardized_values.reshape(1, -1)
     return (1 / standardized_values.shape[0]) * np.dot(standardized_values.T, standardized_values)
 
 # Perform SVD and return the eigen vector matrix
 def svd(covariance_matrix):
+    covariance_matrix = covariance_matrix.reshape(1, -1)
     eigenvector_matrix, _, _ = np.linalg.svd(covariance_matrix)
     return eigenvector_matrix
 
@@ -16,6 +16,7 @@ def pca(eigenvector_matrix, n_components):
 
 # Project data onto principal components
 def project(principal_components, standardized_values):
+    principal_components = np.repeat(principal_components, len(standardized_values))
     return np.dot(standardized_values, principal_components)
 
 # Full PCA using SVD pipeline
