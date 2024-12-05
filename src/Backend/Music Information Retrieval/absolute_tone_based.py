@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from process_midi import process_midi
+from process_midi import transpose_to_c
+from process_midi import clamp
 
 def absolute_tone_based(file_path):
     # Processing MIDI file
@@ -8,18 +10,19 @@ def absolute_tone_based(file_path):
 
     # Converting normalized pitch to original midi pitch
     original_pitches = [int(round((note * std_pitch) + mean_pitch)) for note, _ in processed_data]
-
-    # Making a histogram of 128 notes
+    transpose = transpose_to_c(original_pitches[0])
+    original_pitches = [note + transpose for note in original_pitches]
+    original_pitches = [clamp(note) for note in original_pitches]
     temp_histogram, _ = np.histogram(original_pitches, bins=128, range=(0, 127))
     histogram = temp_histogram.tolist()
 
     return histogram
 
 # Just for testing
-# def plot_histogram(histogram): 
-#     plt.bar(range(128), histogram, width=1.0, edgecolor='black')
-#     plt.title("Distribusi Nada MIDI (Absolute Tone Based)")
-#     plt.xlabel("Nada MIDI (0-127)")
-#     plt.ylabel("Frekuensi Kemunculan")
-#     plt.grid(axis='y', linestyle='--', alpha=0.7)
-#     plt.show()
+# file_path = 'test1.mid'
+# try:
+#     hasil = absolute_tone_based(file_path)
+#     print(hasil)    
+
+# except Exception as e:
+#     print(f"Error: {e}")

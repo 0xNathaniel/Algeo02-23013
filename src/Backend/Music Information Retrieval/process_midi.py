@@ -2,6 +2,19 @@ import mido
 import math
 import numpy as np
 
+def transpose_to_c(note):
+    transpose_amount = (60 - note) % 12  # Hitung pergeseran ke C (60)
+    return transpose_amount
+
+def clamp(note):
+    if (note > 127):
+        return 127
+    elif (note < 0):
+        return 0
+    else:
+        return note
+    
+
 def process_midi(file_path, window_size=40, sliding_step=8):
     midi_file = mido.MidiFile(file_path)
     melody_notes = []
