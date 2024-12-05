@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:wght@300&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --font-montserrat: 'Montserrat', sans-serif;
+  --font-lora: 'Lora', serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-montserrat); /* Default font */
+}
+
+.font-montserrat {
+  font-family: var(--font-montserrat);
+  font-weight: 300;
+}
+
+.font-lora {
+  font-family: var(--font-lora);
+  font-weight: 400; /* Default */
+}
+
+.font-lora-bold {
+  font-family: var(--font-lora);
+  font-weight: 600;
+}
