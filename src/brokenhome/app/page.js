@@ -43,6 +43,7 @@ export default function Home() {
             src = {Logo}
             width={50}
             className="ml-5"
+            alt = 'Logo'
             />
           </div>
           <p className="text-2xl">Broken home adalah lorem ipsum des morales imaculata es spanyol ula to se u fskd sog  sdjsdjfnan dfksklorem ipsum des morales imaculata es spanyol ula to se u fskd sog  sdjsdjfnan dfksklorem ipsum des morales imaculata es spanyol ula to se u fskd sog  sdjsdjfnan dfksklorem ipsum des morales imaculata es spanyol ula to se u fskd sog  sdjsdjfnan dfksk</p>

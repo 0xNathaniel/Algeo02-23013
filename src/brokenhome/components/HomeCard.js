@@ -14,7 +14,7 @@ export default function HomeCard({ data }) {
           className="rounded-2xl object-cover w-full h-full"
         />
       </div>
-      {/* Text Content */}
+      
       <div className="flex flex-col justify-center px-5 md:px-10">
         <div className="text-4xl font-semibold py-5">{data.name}</div>
         <div className="text-2xl font-semibold">{data.nim}</div>

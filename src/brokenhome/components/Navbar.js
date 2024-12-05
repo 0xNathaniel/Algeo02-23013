@@ -19,7 +19,7 @@ const Navbar = () => {
               />
             </div>
             <div className='flex '>
-              <Link href='/'>
+              <Link href='/' className='mx-2'>
               <button className={`flex text-white w-full rounded-md px-5 py-2 mx-2 bg-[#646A9F] hover:bg-[#F3C081] items-center justify-center ${pathname ==='/' ? 'bg-[#F4992A]' : 'bg-[#646A9F]'}`}>
                 <Image
                 src = {Home}
@@ -30,7 +30,7 @@ const Navbar = () => {
               </button>
               </Link>
 
-              <Link href='/finder'>
+              <Link href='/finder' className='mx-2'>
               <button className={`flex text-white w-full rounded-md  px-5 py-2 mx-2 bg-[#646A9F] hover:bg-[#F3C081] items-center justify-center ${pathname ==='/' ? 'bg-[#646A9F]' : 'bg-[#F4992A]'}`}>
                 <Image
                 src = {Search}
