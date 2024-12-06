@@ -2,10 +2,10 @@ import os
 import numpy as np
 from image_processing_and_loading import load_and_process_images
 from data_centering import standardize_data
-from pca import perform_pca, get_principal_components, project_images
+from pca import perform_svd, get_principal_components, project_images
 
 # Local cache file
-CACHE_FILE = "cache.txt" 
+CACHE_FILE = "album_picture_finder_cache.txt" 
 
 def load_cache():
     if not os.path.exists(CACHE_FILE):
@@ -62,7 +62,7 @@ def preprocess_database_images(image_directory, resize_dim, n_components):
     else:
         # Recompute new data
         standardized_images, mean = standardize_data(images)
-        _, _, eigenvector = perform_pca(standardized_images, n_components)
+        _, _, eigenvector = perform_svd(standardized_images, n_components)
         principal_components = get_principal_components(eigenvector, n_components)
         image_projections = project_images(standardized_images, principal_components)
         # Save to cache

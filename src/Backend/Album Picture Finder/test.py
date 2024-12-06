@@ -1,10 +1,6 @@
 import os
 import numpy as np
 from PIL import Image
-from image_processing_and_loading import load_and_process_images
-from data_centering import standardize_data
-from pca import perform_pca, get_principal_components, project_images
-from similarity import calculate_euclidean_distance
 from retrieval_and_output import preprocess_query_image, output_similarity
 from cache import preprocess_database_images
 
