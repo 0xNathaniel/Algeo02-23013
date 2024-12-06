@@ -1,9 +1,6 @@
 import os
 import numpy as np
 from PIL import Image
-from image_processing_and_loading import load_and_process_images
-from data_centering import standardize_data
-from pca import perform_svd, get_principal_components, project_images
 from similarity import calculate_euclidean_distance
 
 '''
