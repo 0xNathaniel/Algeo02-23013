@@ -6,6 +6,7 @@ from data_centering import standardize_data
 from pca import perform_pca, get_principal_components, project_images
 from similarity import calculate_euclidean_distance
 
+'''
 def preprocess_database_images(image_directory, resize_dim, n_components):
     images, image_files = load_and_process_images(image_directory, resize_dim)
     standardized_images, mean = standardize_data(images)
@@ -13,7 +14,8 @@ def preprocess_database_images(image_directory, resize_dim, n_components):
     principal_components = get_principal_components(eigenvector, n_components)
     image_projections = project_images(standardized_images, principal_components)
     return image_files, mean, principal_components, image_projections
-
+'''
+    
 def preprocess_query_image(mean, query_image, resize_dim, principal_components):
     # Preprocess the query image using the calculated
     grayscale_image = query_image.convert('L')

@@ -5,6 +5,8 @@ from image_processing_and_loading import load_and_process_images
 from data_centering import standardize_data
 from pca import perform_pca, get_principal_components, project_images
 from similarity import calculate_euclidean_distance
+from retrieval_and_output import preprocess_query_image, output_similarity
+from cache import preprocess_database_images
 
 # Parameters
 image_directory = "src/Backend/Album Picture Finder/Album Pictures"  # Change to your image directory
@@ -15,24 +17,12 @@ resize_dim = 512  # Resize dimension (images will be resized to resize_dim x res
 
 def main():
     # Load and process database images
-    images, image_files = load_and_process_images(image_directory, resize_dim)
-    standardized_images, mean = standardize_data(images)
-    _, _, eigenvector = perform_pca(standardized_images, n_components)
-    principal_components = get_principal_components(eigenvector, n_components)
-    image_projections = project_images(standardized_images, principal_components)
-    
+    image_files, mean, principal_components, image_projections = preprocess_database_images(image_directory, resize_dim, n_components)
     # Load and process the query image
     query_image = Image.open(os.path.join(image_directory, query_image_name)).convert('L')
-    query_image_resized = query_image.resize((resize_dim, resize_dim))
-    query_image_array = np.array(query_image_resized).flatten()
-    query_image_standardized = query_image_array - mean
-    query_projection = np.dot(query_image_standardized, principal_components.T)
-    
-    # Calculate distances or similiarity
-    distances = calculate_euclidean_distance(query_projection, image_projections)
-    
-    sorted_indices = np.argsort(distances)
-    top_n_indices = sorted_indices[:n_images]
+    query_projection = preprocess_query_image(mean, query_image, resize_dim, principal_components)
+    # Calculate similarity (Euclidean distance)
+    distances, _, top_n_indices = output_similarity(query_projection, image_projections, top_n_images)
     
     # Display the results
     print(f"Top {n_images} most similar images to {query_image_name}:")

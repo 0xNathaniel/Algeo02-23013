@@ -3,14 +3,8 @@ from fastapi.responses import JSONResponse
 import os
 import numpy as np
 from PIL import Image
-from typing import List
-
-# Import your existing functions
-from image_processing_and_loading import load_and_process_images
-from data_centering import standardize_data
-from pca import perform_pca, get_principal_components, project_images
-from similarity import calculate_euclidean_distance
-from retrieval_and_output import preprocess_database_images, preprocess_query_image, output_similarity
+from cache import preprocess_database_images
+from retrieval_and_output import preprocess_query_image, output_similarity
 
 '''
 This API will:
@@ -31,6 +25,7 @@ TOP_N_IMAGES = 24  # Number of top similar images to return
 # Preload and preprocess database images
 image_files, mean, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
 
+# API
 @app.post("/finder/")
 async def find_similar_images(query_image: UploadFile = File(...)):
     try:
@@ -38,7 +33,7 @@ async def find_similar_images(query_image: UploadFile = File(...)):
         query_image = Image.open(query_image.file)
         query_projection = preprocess_query_image(mean, query_image, RESIZE_DIM, principal_components)
         # Calculate similarity (Euclidean distance)
-        distances, sorted_indices, top_n_indices = output_similarity(query_projection, image_projections, TOP_N_IMAGES)
+        distances, _, top_n_indices = output_similarity(query_projection, image_projections, TOP_N_IMAGES)
         # Get results
         results = [
             {"rank": rank + 1, "image_name": image_files[index], "distance": float(distances[index])}
