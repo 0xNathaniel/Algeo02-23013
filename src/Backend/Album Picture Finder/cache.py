@@ -4,7 +4,8 @@ from image_processing_and_loading import load_and_process_images
 from data_centering import standardize_data
 from pca import perform_pca, get_principal_components, project_images
 
-CACHE_FILE = "cache.txt"  # Local cache file
+# Local cache file
+CACHE_FILE = "cache.txt" 
 
 def load_cache():
     if not os.path.exists(CACHE_FILE):
@@ -33,12 +34,15 @@ def save_cache(metadata, mean, principal_components, image_projections):
 def check_cache(metadata):
     cache = load_cache()
     if not cache:
-        return None  # No cache exists
+        # No cache exists
+        return None 
     if (cache["image_files"] == metadata["image_files"] and
         cache["n_components"] == metadata["n_components"] and
         cache["resize_dim"] == metadata["resize_dim"]):
-        return cache  # Cache matches
-    return None  # Cache doesn't match
+        # Cache matches
+        return cache 
+    # Cache doesn't match
+    return None  
 
 def preprocess_database_images(image_directory, resize_dim, n_components):
     # Load and process images
@@ -51,17 +55,16 @@ def preprocess_database_images(image_directory, resize_dim, n_components):
     # Check cache
     cache = check_cache(metadata)
     if cache:
-        print("Using cached data...")
+        # Use cached data
         mean = cache["mean"].reshape((-1,))
         principal_components = cache["principal_components"].reshape((n_components, -1))
         image_projections = cache["image_projections"].reshape((-1, n_components))
     else:
-        print("Recomputing data...")
+        # Recompute new data
         standardized_images, mean = standardize_data(images)
         _, _, eigenvector = perform_pca(standardized_images, n_components)
         principal_components = get_principal_components(eigenvector, n_components)
         image_projections = project_images(standardized_images, principal_components)
-        
         # Save to cache
         save_cache(metadata, mean, principal_components, image_projections)
     
