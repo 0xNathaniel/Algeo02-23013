@@ -32,9 +32,6 @@ if not os.path.exists(MAPPER_FILE):
 
 # Load mapper file into a dictionary
 def load_mapper(mapper_file):
-    """
-    Load the mapper file and return a dictionary mapping pic_name to audio_file.
-    """
     mapper = {}
     try:
         with open(mapper_file, "r") as file:
@@ -67,25 +64,22 @@ mapper = load_mapper(MAPPER_FILE)
 image_files, mean, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
 
 # API endpoint
-@app.post("/picturefinder/")
+@app.post("/finder/")
 async def find_similar_images(query_image: UploadFile = File(...)):
     try:
         # Ensure the query image is valid
         if not query_image.filename.lower().endswith(('png', 'jpg', 'jpeg')):
             raise HTTPException(status_code=400, detail="Invalid image format. Supported formats are: PNG, JPG, JPEG.")
-        
         # Preprocess query image
         query_image = Image.open(query_image.file)
         query_projection = preprocess_query_image(mean, query_image, RESIZE_DIM, principal_components)
-        
         # Calculate similarity (Euclidean distance)
         distances, _, top_n_indices = output_similarity(query_projection, image_projections, TOP_N_IMAGES)
-        
         # Get results
         results = []
         for rank, index in enumerate(top_n_indices):
             pic_name = image_files[index]
-            audio_file = mapper.get(pic_name, "Unknown")  # Default to "Unknown" if no mapping is found
+            audio_file = mapper.get(pic_name, "Unknown")
             results.append({
                 "rank": rank + 1,
                 "pic_name": pic_name,
