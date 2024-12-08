@@ -12,4 +12,4 @@ def cosine_similarity_custom(vec1, vec2):
     return cosine_similarity
 
 def final_similarity(atb, rtb, ftb):
-    return (45*atb + 45*rtb + 10*ftb) / 100
+    return (5*atb +55*rtb + 40*ftb) / 100
