@@ -1,6 +1,6 @@
 import os
 
-MAPPER_FILE = "C:\\Users\\omgit\\repos\\Tugas Besar Semester 3\\Algeo02-23013\\src\\Data\\mapper.txt"
+MAPPER_FILE = "src/Backend/Album Picture Finder/mapper.txt"
 
 # Load mapper file into a dictionary
 def load_mapper(mapper_file):

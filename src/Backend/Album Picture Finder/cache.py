@@ -5,13 +5,10 @@ from image_processing_and_loading import load_and_process_images
 from data_centering import standardize_data
 from pca import perform_svd, get_principal_components, project_images
 
-# Local cache file
-CACHE_FILE = "C:\\Users\\omgit\\repos\\Tugas Besar Semester 3\\Algeo02-23013\\src\\Album Picture Finder\\album_picture_finder_cache.txt"
+# Local cache file 
+CACHE_FILE = "album_picture_finder_cache.txt"
 
 def calculate_dataset_hash(image_files, image_directory):
-    """
-    Calculate a hash for the dataset based on the content of the image files.
-    """
     hash_md5 = hashlib.md5()
     for image_file in sorted(image_files):  # Sort to ensure consistent order
         image_path = os.path.join(image_directory, image_file)
@@ -22,9 +19,6 @@ def calculate_dataset_hash(image_files, image_directory):
     return hash_md5.hexdigest()
 
 def load_cache():
-    """
-    Load cached data from the local cache file.
-    """
     if not os.path.exists(CACHE_FILE):
         print("Cache file does not exist.")
         return None
@@ -45,9 +39,6 @@ def load_cache():
     return cache
 
 def save_cache(metadata, mean, principal_components, image_projections, dataset_hash):
-    """
-    Save computed data and metadata to the cache file.
-    """
     try:
         # Ensure the directory exists
         directory = os.path.dirname(CACHE_FILE)
@@ -69,9 +60,6 @@ def save_cache(metadata, mean, principal_components, image_projections, dataset_
         print(f"Failed to write cache: {e}")
 
 def check_cache(metadata, dataset_hash):
-    """
-    Check if the cached data matches the current dataset and parameters.
-    """
     cache = load_cache()
     if not cache:
         print("No valid cache found.")
@@ -90,9 +78,6 @@ def check_cache(metadata, dataset_hash):
     return cache
 
 def preprocess_database_images(image_directory, resize_dim, n_components):
-    """
-    Preprocess database images, leveraging caching when possible.
-    """
     try:
         # Load and process images
         images, image_files = load_and_process_images(image_directory, resize_dim)

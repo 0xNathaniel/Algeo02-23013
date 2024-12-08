@@ -9,9 +9,9 @@ from mapper import load_mapper
 # FastAPI app
 app = FastAPI()
 
-# Parameters
-IMAGE_DIRECTORY = "C:\\Users\\omgit\\repos\\Tugas Besar Semester 3\\Algeo02-23013\\src\\Data\\Dataset"
-MAPPER_FILE = "C:\\Users\\omgit\\repos\\Tugas Besar Semester 3\\Algeo02-23013\\src\\Data\\mapper.txt"
+# Parameters 
+IMAGE_DIRECTORY = "../../Data/Dataset"
+MAPPER_FILE = "../../Data/mapper.txt"
 RESIZE_DIM = 512  # Number of pixels (for image resizing)
 N_COMPONENTS = 8  # Number of principal components
 TOP_N_IMAGES = 6  # Number of top similar images to return
