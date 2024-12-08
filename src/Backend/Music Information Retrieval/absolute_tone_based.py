@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from process_midi import process_midi
 from process_midi import transpose_to_c
 from process_midi import clamp
+from process_midi import normalize_histogram_cumulative
+# from process_midi import vectorize
 
 def absolute_tone_based(file_path):
     # Processing MIDI file
@@ -14,15 +16,7 @@ def absolute_tone_based(file_path):
     original_pitches = [note + transpose for note in original_pitches]
     original_pitches = [clamp(note) for note in original_pitches]
     temp_histogram, _ = np.histogram(original_pitches, bins=128, range=(0, 127))
-    histogram = temp_histogram.tolist()
+    normalized_histogram = normalize_histogram_cumulative(temp_histogram)
+    output = np.array(normalized_histogram)
 
-    return histogram
-
-# Just for testing
-# file_path = 'test1.mid'
-# try:
-#     hasil = absolute_tone_based(file_path)
-#     print(hasil)    
-
-# except Exception as e:
-#     print(f"Error: {e}")
+    return output
