@@ -18,6 +18,7 @@ async def find_similar_midi(query_midi: UploadFile = File(...)):
         query_audio = MidiFile(query_midi.file)
         similarities = find_most_similar(query_audio, MIDI_DIRECTORY)
         results = [{"rank": rank, "midi_name": midi_name, "similarity": similarity} for rank, midi_name, similarity in similarities]
+        return JSONResponse(content={"similar_audio_files": results})
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the query MIDI file: {str(e)}")
