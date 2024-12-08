@@ -4,13 +4,7 @@ import os
 from PIL import Image
 from cache import preprocess_database_images
 from retrieval_and_output import preprocess_query_image, output_similarity
-
-'''
-This API will:
-1. Accept a query image request and validate it.
-2. Preprocess database images and count/sort similarity to the query image.
-3. Return a JSON response with rank, pic_name, audio_file, and distance.
-'''
+from mapper import load_mapper
 
 # FastAPI app
 app = FastAPI()
@@ -30,33 +24,6 @@ if not os.path.exists(IMAGE_DIRECTORY):
 if not os.path.exists(MAPPER_FILE):
     raise FileNotFoundError(f"The specified mapper file does not exist: {MAPPER_FILE}")
 
-# Load mapper file into a dictionary
-def load_mapper(mapper_file):
-    mapper = {}
-    try:
-        with open(mapper_file, "r") as file:
-            for line_number, line in enumerate(file, start=1):
-                # Skip the header line
-                if line_number == 1:
-                    continue
-                stripped_line = line.strip()
-                if not stripped_line:  # Skip empty lines
-                    print(f"Skipping empty line {line_number}")
-                    continue
-                try:
-                    # Expecting `audio_file pic_name` structure
-                    audio_file, pic_name = stripped_line.split()
-                    mapper[pic_name] = audio_file
-                except ValueError:
-                    print(f"Skipping invalid line {line_number}: {stripped_line}")
-    except FileNotFoundError:
-        print(f"Mapper file not found: {mapper_file}")
-        raise
-    except Exception as e:
-        print(f"Error reading mapper file: {e}")
-        raise
-    return mapper
-
 # Load the mapper
 mapper = load_mapper(MAPPER_FILE)
 
@@ -70,24 +37,43 @@ async def find_similar_images(query_image: UploadFile = File(...)):
         # Ensure the query image is valid
         if not query_image.filename.lower().endswith(('png', 'jpg', 'jpeg')):
             raise HTTPException(status_code=400, detail="Invalid image format. Supported formats are: PNG, JPG, JPEG.")
+        
         # Preprocess query image
         query_image = Image.open(query_image.file)
         query_projection = preprocess_query_image(mean, query_image, RESIZE_DIM, principal_components)
+        
         # Calculate similarity (Euclidean distance)
-        distances, _, top_n_indices = output_similarity(query_projection, image_projections, TOP_N_IMAGES)
-        # Get results
+        distances, _, top_n_indices = output_similarity(query_projection, image_projections, len(image_files))
+        
+        # Normalize the distances to percentages (0 - 100%)
+        min_distance = min(distances)
+        max_distance = max(distances)
+        similarity_percentages = [
+            100 * (1 - (dist - min_distance) / (max_distance - min_distance)) for dist in distances
+        ]
+        
+        # Prepare the results with similarity percentages
         results = []
-        for rank, index in enumerate(top_n_indices):
+        for index, similarity_percentage in zip(top_n_indices, similarity_percentages):
             pic_name = image_files[index]
             audio_file = mapper.get(pic_name, "Unknown")
             results.append({
-                "rank": rank + 1,
                 "pic_name": pic_name,
                 "audio_file": audio_file,
-                "distance": float(distances[index]),
+                "similarity_percentage": round(similarity_percentage, 2),
             })
         
-        return JSONResponse(content={"similar_images": results})
+        # Sort the results by similarity_percentage in descending order
+        results_sorted = sorted(results, key=lambda x: x['similarity_percentage'], reverse=True)
+        
+        # Select only the top N results
+        top_n_results = results_sorted[:TOP_N_IMAGES]
+        
+        # Assign ranks based on sorted results
+        for i, result in enumerate(top_n_results):
+            result['rank'] = i + 1
+        
+        return JSONResponse(content={"similar_images": top_n_results})
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the query image: {str(e)}")
