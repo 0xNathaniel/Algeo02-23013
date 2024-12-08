@@ -5,12 +5,13 @@ from retrieval_and_output import preprocess_query_image, output_similarity
 from cache import preprocess_database_images
 
 # Parameters
-image_directory = "src/Backend/Album Picture Finder/Album Pictures"  # Change to your image directory
-query_image_name = "0.jpg"  # Change to your query image name
+image_directory = "src/Data/Dataset"
+#image_directory = "src/Backend/Album Picture Finder/Album Pictures"# Change to your image directory
+query_image_name = "pic1.png"  # Change to your query image name
 n_components = 8  # Number of principal components
-n_images = 5  # Number of top similar images to return
+n_images = 6  # Number of top similar images to return
 resize_dim = 512  # Resize dimension (images will be resized to resize_dim x resize_dim)
-top_n_images = 24 # # Number of top similar images to return
+top_n_images = 6 # # Number of top similar images to return
 
 def main():
     # Load and process database images
