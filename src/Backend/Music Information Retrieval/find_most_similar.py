@@ -31,8 +31,7 @@ def find_most_similar(query_file, dataset_features):
     i = 1
 
     for filename in os.listdir(dataset_features):
-        if filename.endswith(".mid"):
-            rank = i
+        if filename.endswith(".mid") or filename.endswith(".midi"):
             file_path = os.path.join(dataset_features, filename)
             features_atb[filename] = absolute_tone_based(file_path)
             features_rtb[filename] = relative_tone_based(file_path)
@@ -46,7 +45,13 @@ def find_most_similar(query_file, dataset_features):
             rtb_similarity = cosine_similarity_custom(query_rtb, features_rtb[filename])
             ftb_similarity = cosine_similarity_custom(query_ftb, features_ftb[filename])
             similarity = (atb_similarity * 5 + rtb_similarity * 47.5 + ftb_similarity * 47.5)/100
-            similarities.append((rank, filename, similarity))
+            similarities.append((filename, similarity))
 
     similarities = sorted(similarities, key=lambda x: x[1], reverse=True)
-    return similarities
+    ranked_similarities = []
+    rank = 1
+    for (filename, similarity) in similarities:
+        ranked_similarities.append((rank, filename, similarity))
+        rank += 1
+        
+    return ranked_similarities
