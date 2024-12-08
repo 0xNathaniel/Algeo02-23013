@@ -41,7 +41,7 @@ const Uploaded = [
 ]
 
 const page = () => {
-  const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 6;
 
 const [currentPage, setCurrentPage] = useState(0);
 
@@ -67,15 +67,89 @@ const paginatedData = Dummy.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1
     }
   };
 
+  const [file, setFile] = useState(null);
+  const [message, setMessage] = useState('');
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      setMessage('Please select a file.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('../api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setMessage(`File uploaded successfully: ${result.path}`);
+      } else {
+        setMessage(`Upload failed: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setMessage('An error occurred while uploading the file.');
+    }
+  };
+  // const [file, setFile] = useState(null);
+  // const [uploadedFilePath, setUploadedFilePath] = useState(null);
+
+  // const handleFileChange = (e) => {
+  //   setFile(e.target.files[0]);
+  // };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!file) {
+  //     alert('Please select a file');
+  //     return;
+  //   }
+
+  //   const formData = new FormData();
+  //   formData.append('file', file);
+
+  //   try {
+  //     const res = await fetch('/api/upload', {
+  //       method: 'POST',
+  //       body: formData,
+  //     });
+
+  //     const data = await res.json();
+  //     if (res.ok) {
+  //       setUploadedFilePath(data.filePath);
+  //       alert('File uploaded successfully');
+  //     } else {
+  //       alert('File upload failed');
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert('An error occurred');
+  //   }
+  // };
+
   return (
     <div>
       <div className='bg-[#1E2567] text-white h-full p-10 flex flex-col justify-center items-center'>
         <h1 className='text-4xl font-lora-bold'>Upload Here!</h1>
         <FinderCard data={Uploaded[0]} />
+        <h1>Upload a File</h1>
+      <form onSubmit={handleUpload}>
+        <input type="file" onChange={handleFileChange} />
+        <button type="submit">Upload</button>
+      </form>
 
         <form action="/upload" method="post" encType="multipart/form-data" className='flex  items-center'>
           <input type="file" name="file" />
-          
           <div>
             <button type="submit" className='bg-[#855738] p-2 m-2 rounded-lg'>Submit</button> 
           </div>
