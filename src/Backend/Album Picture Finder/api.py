@@ -52,10 +52,10 @@ async def find_similar_images(query_image: UploadFile = File(...)):
                 "distance": distances[index],
             })
         
-        min_distance = min([result['distance'] for result in results])
+        #min_distance = min([result['distance'] for result in results])
         max_distance = max([result['distance'] for result in results])
         similarity_percentages = [
-            100 * (1 - (result['distance'] - min_distance) / (max_distance - min_distance)) for result in results
+            100 * (1 - (result['distance']) / (max_distance)) for result in results
         ]
         
         for i, result in enumerate(results):
