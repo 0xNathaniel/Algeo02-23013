@@ -9,12 +9,14 @@ def transpose_to_c(note):
 def normalize_length(RTB1, RTB2, FTB1, FTB2):
     selisih = abs(len(RTB1) - len(RTB2))
     if (selisih != 0):
-        if (len(RTB1) < len(RTB2)):
-            RTB1 = np.append(RTB1, [0] * selisih)
-            FTB1 = np.append(FTB1, [0] * selisih)
+        if (len(RTB1) > len(RTB2)):
+            for i in range (selisih):
+                RTB1 = np.delete(RTB1, -1)
+                FTB1 = np.delete(FTB1, -1)
         else:
-            RTB2 = np.append(RTB2, [0] * selisih)
-            FTB2 = np.append(FTB2, [0] * selisih)
+            for i in range (selisih):
+                RTB2 = np.delete(RTB2, -1)
+                FTB2 = np.delete(FTB2, -1)
     return RTB1, RTB2, FTB1, FTB2
 
 def clamp(note):
