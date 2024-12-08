@@ -5,8 +5,8 @@ from image_processing_and_loading import load_and_process_images
 from data_centering import standardize_data
 from pca import perform_svd, get_principal_components, project_images
 
-# Local cache file
-CACHE_FILE = "C:\\Users\\omgit\\repos\\Tugas Besar Semester 3\\Algeo02-23013\\src\\Album Picture Finder\\album_picture_finder_cache.txt"
+# Local cache file 
+CACHE_FILE = "album_picture_finder_cache.txt"
 
 def calculate_dataset_hash(image_files, image_directory):
     hash_md5 = hashlib.md5()
