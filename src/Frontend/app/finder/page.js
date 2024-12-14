@@ -31,8 +31,6 @@ const generateDummyDataPicture = () => {
 
 let Dummy = generateDummyDataAudio();
 
-
-
 const Uploaded = [
   {
     name: 'blablahey.midi',
@@ -68,11 +66,8 @@ const paginatedData = Dummy.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1
   };
 
   const [file, setFile] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState();
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -85,7 +80,7 @@ const paginatedData = Dummy.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1
     formData.append('file', file);
 
     try {
-      const response = await fetch('../api/upload', {
+      const response = await fetch('http://127.0.0.1:8000/finder/', {
         method: 'POST',
         body: formData,
       });
@@ -101,64 +96,45 @@ const paginatedData = Dummy.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1
       setMessage('An error occurred while uploading the file.');
     }
   };
-  // const [file, setFile] = useState(null);
-  // const [uploadedFilePath, setUploadedFilePath] = useState(null);
 
-  // const handleFileChange = (e) => {
-  //   setFile(e.target.files[0]);
-  // };
+  const [uploadedImage, setUploadedImage] = useState(null); // State for the image URL
+  const [imageName, setImageName] = useState(); // State for the image name
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (!file) {
-  //     alert('Please select a file');
-  //     return;
-  //   }
-
-  //   const formData = new FormData();
-  //   formData.append('file', file);
-
-  //   try {
-  //     const res = await fetch('/api/upload', {
-  //       method: 'POST',
-  //       body: formData,
-  //     });
-
-  //     const data = await res.json();
-  //     if (res.ok) {
-  //       setUploadedFilePath(data.filePath);
-  //       alert('File uploaded successfully');
-  //     } else {
-  //       alert('File upload failed');
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     alert('An error occurred');
-  //   }
-  // };
+  const handleFileChange = (event) => {
+    const file = event.target.files[0]; // Get the first file
+    if (file) {
+      setImageName(file.name); // Set the image name
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUploadedImage(e.target.result); // Update state with file URL
+      };
+      reader.readAsDataURL(file); // Read file as a URL
+    }
+  };
 
   return (
     <div>
       <div className='bg-[#1E2567] text-white h-full p-10 flex flex-col justify-center items-center'>
         <h1 className='text-4xl font-lora-bold'>Upload Here!</h1>
-        <FinderCard data={Uploaded[0]} />
-        <h1>Upload a File</h1>
-      <form onSubmit={handleUpload}>
-        <input type="file" onChange={handleFileChange} />
-        <button type="submit">Upload</button>
+        <FinderCard image={uploadedImage} name={imageName} />
+        <form onSubmit={handleUpload} className="flex items-center gap-2 mb-2">
+          <input
+            type="file"
+            onChange={handleFileChange}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-[#855738] hover:file:bg-[#F3C081]"
+          />
+          <button
+            type="submit"
+            className="py-2 px-4 my-2 bg-[#855738] text-white font-semibold rounded-lg shadow-md hover:bg-[#F3C081] focus:outline-none focus:ring-2 focus:ring-[#F4992A] focus:ring-offset-2"
+          >
+            Upload
+        </button>
       </form>
 
-        <form action="/upload" method="post" encType="multipart/form-data" className='flex  items-center'>
-          <input type="file" name="file" />
-          <div>
-            <button type="submit" className='bg-[#855738] p-2 m-2 rounded-lg'>Submit</button> 
-          </div>
-        </form>
-
-        <div className='text-2xl'>
-          <button className='bg-[#F4992A] hover:bg-[#F3C081] p-2 px-5 m-2 rounded-lg'>Audios</button>
-          <button className='bg-[#F4992A] hover:bg-[#F3C081] p-2 px-5 m-2 rounded-lg'>Pictures</button>
-          <button className='bg-[#F4992A] hover:bg-[#F3C081] p-2 px-5 m-2 rounded-lg'>Mapper</button>
+        <div className='text-2xl flex space-x-2'>
+          <button className='bg-[#F4992A] hover:bg-[#F3C081] py-2 px-5 rounded-lg'>Audios</button>
+          <button className='bg-[#F4992A] hover:bg-[#F3C081] py-2 px-5 rounded-lg'>Pictures</button>
+          <button className='bg-[#F4992A] hover:bg-[#F3C081] py-2 px-5 rounded-lg'>Mapper</button>
         </div>
       </div>
 
@@ -173,7 +149,7 @@ const paginatedData = Dummy.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1
           </div>
           <div className='flex flex-wrap items-center justify-center'>
             {paginatedData.map((data, index) => (
-              <FinderCard key={index} data={data} />
+              <FinderCard key={index} image={data.img} name={data.name}/>
             ))}
           </div>
 
