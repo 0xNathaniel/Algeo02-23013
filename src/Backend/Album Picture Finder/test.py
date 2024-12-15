@@ -10,7 +10,7 @@ image_directory = "src/Data/Dataset"
 query_image_name = "pic1.png"  # Change to your query image name
 n_components = 8  # Number of principal components
 n_images = 6  # Number of top similar images to return
-resize_dim = 512  # Resize dimension (images will be resized to resize_dim x resize_dim)
+resize_dim = 64  # Resize dimension (images will be resized to resize_dim x resize_dim)
 top_n_images = 6 # # Number of top similar images to return
 
 def main():

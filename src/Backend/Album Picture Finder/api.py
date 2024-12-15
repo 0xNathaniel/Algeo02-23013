@@ -2,8 +2,8 @@ import os
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from PIL import Image
-from cache import preprocess_database_images
 from retrieval_and_output import preprocess_query_image, output_similarity
+from cache import preprocess_database_images
 from mapper import load_mapper
 
 # FastAPI app
@@ -12,9 +12,9 @@ app = FastAPI()
 # Parameters
 IMAGE_DIRECTORY = "../../Data/Dataset"
 MAPPER_FILE = "../../Data/mapper.txt"
-RESIZE_DIM = 512  # Number of pixels (for image resizing)
+RESIZE_DIM = 64  # Number of pixels (for image resizing)
 N_COMPONENTS = 8  # Number of principal components
-TOP_N_IMAGES = 6  # Number of top similar images to return
+TOP_N_IMAGES = 30  # Number of top similar images to return
 
 # Check if the IMAGE_DIRECTORY exists
 if not os.path.exists(IMAGE_DIRECTORY):
