@@ -10,6 +10,3 @@ def cosine_similarity_custom(vec1, vec2):
     # Calculating cosine similarity: A.B / (norm A * norm B)
     cosine_similarity = dot_product / (norm_a * norm_b)
     return cosine_similarity
-
-def final_similarity(atb, rtb, ftb):
-    return (5*atb +55*rtb + 40*ftb) / 100
