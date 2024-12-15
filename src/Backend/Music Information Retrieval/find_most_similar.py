@@ -10,16 +10,6 @@ from first_tone_based import first_tone_based
 from cosine_similarity import cosine_similarity_custom
 
 def find_most_similar(query_file, dataset_midis):
-    """
-    Finds the most similar MIDI files from a list of preloaded MIDI objects.
-
-    Args:
-        query_file (mido.MidiFile): Query MIDI file object.
-        dataset_midis (list of tuples): List of tuples (filename, mido.MidiFile).
-
-    Returns:
-        list: Ranked similarities with (rank, filename, similarity).
-    """
     query_atb, mean, std = process_midi(query_file)
     query_rtb, mean, std = process_midi(query_file)
     query_ftb, mean, std = process_midi(query_file)
@@ -46,10 +36,11 @@ def find_most_similar(query_file, dataset_midis):
         atb_similarity = cosine_similarity_custom(query_atb, features_atb)
         rtb_similarity = cosine_similarity_custom(query_rtb, features_rtb)
         ftb_similarity = cosine_similarity_custom(query_ftb, features_ftb)
-        similarity = (atb_similarity * 5 + rtb_similarity * 47.5 + ftb_similarity * 47.5) / 100
-        similarities.append((filename, similarity))
+        similarity = (atb_similarity * 5 + rtb_similarity * 50 + ftb_similarity * 45) / 100
+        similarity_percentage = f"{similarity * 100:.2f}%"
+        similarities.append((filename, similarity_percentage))
 
-    similarities = sorted(similarities, key=lambda x: x[1], reverse=True)
+    similarities = sorted(similarities, key=lambda x: float(x[1].rstrip('%')), reverse=True)
     ranked_similarities = [(rank + 1, filename, similarity) for rank, (filename, similarity) in enumerate(similarities)]
     
     return ranked_similarities

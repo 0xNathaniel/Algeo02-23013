@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 def transpose_to_c(note):
-    transpose_amount = (60 - note) % 12  # Hitung pergeseran ke C (60)
+    transpose_amount = (60 - note) % 12
     return transpose_amount
 
 def normalize_length(RTB1, RTB2, FTB1, FTB2):
@@ -38,7 +38,6 @@ def normalize_histogram_cumulative(histogram):
     return normalized_histogram
 
 def process_midi(midi_file, window_size=40, sliding_step=8):
-
     melody_notes = []
     time_accumulator = 0
 
@@ -60,7 +59,7 @@ def process_midi(midi_file, window_size=40, sliding_step=8):
 
     if not melody_notes:
         raise ValueError("Tidak ada notasi yang ditemukan di Channel 0.")
-    
+        
     dev_notes_list = [x[0] for x in melody_notes]
     dev_notes_list_mean = sum(dev_notes_list) / len(dev_notes_list)
     dev_notes = math.sqrt(sum((x - dev_notes_list_mean) ** 2 for x in dev_notes_list) / len(dev_notes_list))
@@ -69,7 +68,10 @@ def process_midi(midi_file, window_size=40, sliding_step=8):
     for i in range(len(melody_notes)):
         converted_notes = (melody_notes[i][0] - dev_notes_list_mean) / dev_notes
         process_midi_result.append((converted_notes, melody_notes[i][1]))
-        
+
+    if process_midi_result is None:
+        return [], 0, 0
+            
     return process_midi_result, dev_notes_list_mean, dev_notes
 
 def find_active_channels(file_path):
