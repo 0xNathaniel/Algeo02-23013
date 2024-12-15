@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from mido import MidiFile
 from find_most_similar import find_most_similar
 from fastapi.middleware.cors import CORSMiddleware
-from mapper import load_mapper
+from mapper_music import load_mapper
 
 # FastAPI app
 app = FastAPI()
@@ -18,7 +18,7 @@ app.add_middleware(
 )
 
 # Parameters
-MIDI_DIRECTORY = "../../Frontend/public/Data/Dataset"
+MIDI_DIRECTORY = "../../Frontend/public/Data/Music Dataset"
 MAPPER_FILE = "../../Data/mapper.txt"
 
 # Preload dataset MIDI files at startup

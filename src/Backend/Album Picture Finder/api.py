@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from PIL import Image
 from retrieval_and_output import preprocess_query_image, output_similarity
 from cache import preprocess_database_images
-from mapper import load_mapper
+from mapper_album import load_mapper
 from fastapi.middleware.cors import CORSMiddleware
 
 # FastAPI app
@@ -19,7 +19,7 @@ app.add_middleware(
 
 # Parameters
 RESIZE_DIM = 64  # Number of pixels (for image resizing)
-IMAGE_DIRECTORY = "../../Frontend/public/Data/Dataset"
+IMAGE_DIRECTORY = "../../Frontend/public/Data/Album Dataset"
 MAPPER_FILE = "../../Frontend/public/Data/mapper.txt"
 N_COMPONENTS = 8  # Number of principal components
 TOP_N_IMAGES = 30  # Number of top similar images to return
@@ -78,3 +78,5 @@ async def find_similar_images(query_image: UploadFile = File(...)):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the query image: {str(e)}")
+
+

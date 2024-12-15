@@ -11,12 +11,13 @@ from fastapi.responses import JSONResponse
 from typing import Union
 from PIL import Image
 from mido import MidiFile
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Album Picture Finder")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Album Picture Finder/")))
 from retrieval_and_output import preprocess_query_image, output_similarity
 from cache import preprocess_database_images
-from mapper import load_mapper
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Music information Retrieval")))
+from mapper_album import load_mapper_album
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Music Information Retrieval/")))
 from find_most_similar import find_most_similar
+from mapper_music import load_mapper_music
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -31,7 +32,7 @@ app.add_middleware(
 )
 
 # Directories and constants
-ALBUM_DIR = "../../Frontend/public/Data/Album Dataset"
+IMAGE_DIRECTORY = "../../Frontend/public/Data/Album Dataset"
 AUDIO_DIR = "../../Frontend/public/Data/Music Dataset"
 SUPPORTED_IMAGE_FILES = (".png", ".jpg", ".jpeg")
 SUPPORTED_AUDIO_FILES = (".wav", ".mid", ".midi")
@@ -44,25 +45,22 @@ TOP_N_IMAGES = 30
 MAPPER_FILE_PATH = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../Frontend/public/Data/")), "mapper.txt")
 
 dataset_midis = []
-mapper = load_mapper(MAPPER_FILE)
+album_mapper = load_mapper_album(MAPPER_FILE)
+music_mapper = load_mapper_music(MAPPER_FILE)
 
 # Ensure directories exist
-if not os.path.exists(ALBUM_DIR):
-    os.makedirs(ALBUM_DIR)
+# Check if the IMAGE_DIRECTORY exists
+if not os.path.exists(IMAGE_DIRECTORY):
+    raise FileNotFoundError(f"The specified image directory does not exist: {IMAGE_DIRECTORY}")
 
-if not os.path.exists(AUDIO_DIR):
-    os.makedirs(AUDIO_DIR)
-
-
-if not os.path.exists(MIDI_DIRECTORY):
-    raise FileNotFoundError(f"The specified MIDI directory does not exist: {MIDI_DIRECTORY}")
+# Check if the MAPPER_FILE exists
+if not os.path.exists(MAPPER_FILE):
+    raise FileNotFoundError(f"The specified mapper file does not exist: {MAPPER_FILE}")
 
 if not os.path.exists(MAPPER_FILE):
     raise FileNotFoundError(f"The specified mapper file does not exist: {MAPPER_FILE}")
 
-image_files, principal_components, image_projections = preprocess_database_images(ALBUM_DIR, RESIZE_DIM, N_COMPONENTS)
-
-app = FastAPI()
+image_files, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
 # Utility Functions
 
 def validate_mapper_format(file_content: str):
@@ -200,7 +198,7 @@ async def find_similar_images(query_image: UploadFile = File(...)):
         results = []
         for rank, index in enumerate(top_n_indices):
             pic_name = image_files[index]
-            mapper_entry = mapper.get(pic_name, {})
+            mapper_entry = album_mapper.get(pic_name, {})
             audio_file = mapper_entry.get("audio_file", "Unknown")
             audio_name = mapper_entry.get("audio_name", "Unknown")
             results.append({
@@ -211,6 +209,7 @@ async def find_similar_images(query_image: UploadFile = File(...)):
                 "distance": distances[index],
             })
         
+        #min_distance = min([result['distance'] for result in results])
         max_distance = max([result['distance'] for result in results])
         similarity_percentages = [
             100 * (1 - (result['distance']) / (max_distance)) for result in results
@@ -218,28 +217,34 @@ async def find_similar_images(query_image: UploadFile = File(...)):
         
         for i, result in enumerate(results):
             result['similarity_percentage'] = round(similarity_percentages[i], 2)
-        
+       
         top_n_results = results[:TOP_N_IMAGES]
         
         return JSONResponse(content={"similar_images": top_n_results})
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the query image: {str(e)}")
 
 @app.post("/music/")
 async def find_similar_midi(query_midi: UploadFile = File(...)):
     try:
+        # Validate file extension
         if not (query_midi.filename.endswith(".mid") or query_midi.filename.endswith(".midi")):
             raise HTTPException(status_code=400, detail="Invalid file type. Only .mid or .midi files are allowed.")
         
+        # Read uploaded file as bytes
         query_midi_bytes = await query_midi.read()
+        
+        # Wrap the bytes in a BytesIO object
         query_midi_filelike = io.BytesIO(query_midi_bytes)
 
         query_midi_obj = MidiFile(file=query_midi_filelike)
         
+        # Call the modified find_most_similar function
         similarities = find_most_similar(query_midi_obj, dataset_midis)
         results = []
         for rank, audio_file, similarity in similarities:
-            mapper_entry = mapper.get(audio_file, {})
+            mapper_entry = music_mapper.get(audio_file, {})
             audio_name = mapper_entry.get("audio_name", "Unknown")
             pic_name = mapper_entry.get("pic_name", "Unknown")
             results.append({
@@ -247,10 +252,11 @@ async def find_similar_midi(query_midi: UploadFile = File(...)):
                 "pic_name": pic_name,
                 "audio_file": audio_file,
                 "audio_name": audio_name,
-                "similarity_percentage": similarity
+                "similarities": similarity
             })
         
         return JSONResponse(content={"similar_audio_files": results})
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the query MIDI file: {str(e)}")
 
@@ -279,7 +285,7 @@ async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
         files = [files]  # Wrap single file in a list
 
     try:
-        processed_files = await process_files(files, ALBUM_DIR, SUPPORTED_IMAGE_FILES)
+        processed_files = await process_files(files, IMAGE_DIRECTORY, SUPPORTED_IMAGE_FILES)
         return JSONResponse(content={
             "message": "Image files successfully uploaded and processed.",
             "processed_files": processed_files

@@ -2,7 +2,7 @@ import os
 
 MAPPER_FILE = "src/Backend/Album Picture Finder/mapper.txt"
 
-def load_mapper(mapper_file):
+def load_mapper_album(mapper_file):
     print("Loading mapper...")
 
     mapper = {}
@@ -17,9 +17,9 @@ def load_mapper(mapper_file):
                     continue
                 try:
                     audio_file, audio_name, pic_name = stripped_line.split()
-                    mapper[audio_file] = {
-                        "audio_name": audio_name,
-                        "pic_name": pic_name
+                    mapper[pic_name] = {
+                        "audio_file": audio_file,
+                        "audio_name": audio_name
                     }
                 except ValueError:
                     print(f"Skipping invalid line {line_number}: {stripped_line}")
@@ -34,5 +34,5 @@ def load_mapper(mapper_file):
 
 if __name__ == "__main__":
     mapper = load_mapper(MAPPER_FILE)
-    for audio_file, info in mapper.items():
-        print(f"Audio: {audio_file}, Audio File: {info['audio_name']}, Audio Name: {info['pic_name']}")
+    for pic_name, info in mapper.items():
+        print(f"Picture: {pic_name}, Audio File: {info['audio_file']}, Audio Name: {info['audio_name']}")

@@ -15,7 +15,8 @@ const page = () => {
   const [midiResponse, setMidiResponse] = useState([]); // Music results (MIDI similarity)
   const [currentView, setCurrentView] = useState("album"); // Default view: album
   const [file, setFile] = useState(null); // File to be uploaded
-  const [zipFile, setZipFile] = useState(null); // ZIP file to be uploaded
+  const [imageFile, setImageFile] = useState(null); 
+  const [audioFile, setAudioFile] = useState(null); 
   const [mapperFile, setMapperFile] = useState(null); // Mapper file to be uploaded
   const [message, setMessage] = useState(null);
 
@@ -63,7 +64,7 @@ const page = () => {
         // API for images
         formData.append("query_image", file);
 
-        const response = await axios.post("http://localhost:8000/finder/", formData, {
+        const response = await axios.post("http://localhost:8000/image/", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
@@ -92,26 +93,56 @@ const page = () => {
   };
 
   // Handle ZIP File Upload (Picture/Audio)
-  const handleZipUpload = async (type) => {
-    if (!zipFile) {
-      setMessage("Please select a ZIP file.");
+  const handleImageUpload = async () => {
+    if (!imageFile) {
+      setMessage("Please select an image file.");
       return;
     }
-
+  
     const formData = new FormData();
-    formData.append("file", zipFile);
-
+    formData.append("files", imageFile); // Ensure the backend expects "files"
+  
     try {
-      await axios.post("http://localhost:8000/upload-zip/", formData, {
+      const response = await axios.post("http://localhost:8000/upload-images/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
-      setMessage(`${type} ZIP file uploaded successfully!`);
+  
+      setMessage(response.data.message || "Image file uploaded successfully!");
+      console.log("Uploaded Images:", response.data.processed_files);
     } catch (error) {
-      setMessage("An error occurred while uploading the ZIP file.");
+      if (error.response) {
+        console.error("Server Error:", error.response.data);
+        setMessage(error.response.data.detail || "Error uploading the image file.");
+      } 
     }
   };
-
+  
+  
+  const handleAudioUpload = async () => {
+    if (!audioFile) {
+      setMessage("Please select an audio file.");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("files", audioFile); // Ensure the backend expects "files"
+  
+    try {
+      const response = await axios.post("http://localhost:8000/upload-music/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+  
+      setMessage(response.data.message || "Audio file uploaded successfully!");
+      console.log("Uploaded Audios:", response.data.processed_files);
+    } catch (error) {
+      if (error.response) {
+        console.error("Server Error:", error.response.data);
+        setMessage(error.response.data.detail || "Error uploading the audio file.");
+      }
+    }
+  };
+  
+  
   // Handle Mapper File Upload
   const handleMapperUpload = async () => {
     if (!mapperFile) {
@@ -120,7 +151,7 @@ const page = () => {
     }
 
     const formData = new FormData();
-    formData.append("file", mapperFile);
+    formData.append("files", mapperFile);
 
     try {
       await axios.post("http://localhost:8000/upload-mapper/", formData, {
@@ -133,8 +164,51 @@ const page = () => {
     }
   };
 
+  const audioPath = "/Data/Dataset/audio_4.midi";
+
+  // const playMidi = async () => {
+  //   try {
+  //     const response = await fetch(audioPath); // Fetch the MIDI file
+  //     const arrayBuffer = await response.arrayBuffer(); // Get the ArrayBuffer
+  //     const midi = new Midi(arrayBuffer); // Parse the MIDI file
+  
+  //     console.log("Parsed MIDI:", midi); // Debug parsed MIDI
+  
+  //     const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+  
+  //     // Iterate over tracks and play notes
+  //     midi.tracks.forEach((track) => {
+  //       track.notes.forEach((note) => {
+  //         synth.triggerAttackRelease(note.name, note.duration, note.time);
+  //       });
+  //     });
+  
+  //     await Tone.start();
+  //     console.log("MIDI playback started!");
+  //   } catch (error) {
+  //     console.error("Error playing MIDI:", error);
+  //     setMessage("An error occurred while playing the MIDI file.");
+  //   }
+  // };
+  const [audio] = useState(
+    typeof Audio !== "undefined" ? new Audio("/Data/Dataset/audio1.mp3") : null
+  );
+
+  const playAudio = () => {
+    if (audio) {
+      audio.play();
+    }
+  };
+
+  const pauseAudio = () => {
+    if (audio) {
+      audio.pause();
+    }
+  };
+
   const handleFileChange = (event) => setFile(event.target.files[0]);
-  const handleZipFileChange = (event) => setZipFile(event.target.files[0]);
+  const handleImageFileChange = (event) => setImageFile(event.target.files[0]);
+  const handleAudioFileChange = (event) => setAudioFile(event.target.files[0]);
   const handleMapperFileChange = (event) => setMapperFile(event.target.files[0]);
 
   return (
@@ -143,6 +217,11 @@ const page = () => {
       <div className="bg-[#1E2567] text-white h-full p-10 flex flex-col justify-center items-center">
         <h1 className="text-4xl font-lora-bold">Upload Here!</h1>
         <FinderCard image={file ? URL.createObjectURL(file) : null} name={file?.name || "No file selected"} />
+
+        <div>
+          <button onClick={playAudio}>Play Audio</button>
+          <button onClick={pauseAudio}>Pause Audio</button>
+        </div>
 
         {/* Upload Form */}
         <form onSubmit={handleUpload} className="flex items-center gap-2 mb-2">
@@ -163,13 +242,13 @@ const page = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleZipUpload("Picture");
+              handleImageUpload("Picture");
             }}
             className="flex space-x-4 items-center"
           >
             <input
               type="file"
-              onChange={handleZipFileChange}
+              onChange={handleImageFileChange}
               accept=".zip"
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-[#855738] hover:file:bg-[#F3C081]"
             />
@@ -184,13 +263,13 @@ const page = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleZipUpload("Audio");
+              handleAudioUpload("Audio");
             }}
             className="flex space-x-4 items-center"
           >
             <input
               type="file"
-              onChange={handleZipFileChange}
+              onChange={handleAudioFileChange}
               accept=".zip"
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-[#855738] hover:file:bg-[#F3C081]"
             />
