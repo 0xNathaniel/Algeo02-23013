@@ -14,7 +14,7 @@
 ![rarfile](https://img.shields.io/badge/rarfile-4.2-darkblue?logo=file-archive&logoColor=white)
 
 
-![Broken Home Logo](img/BrokenHomeLogo.png)
+![Broken Home Logo](img/BrokenHomeLogoDark.png)
 
 **Aplikasi BrokenHome: Album Picture Finder dan Music Information Retrieval** adalah solusi berbasis **Information Retrieval** yang dirancang untuk menemukan gambar album musik dan file audio yang memiliki kesamaan dengan data yang diunggah pengguna. Aplikasi ini mengimplementasikan algoritma pemrosesan gambar dan audio untuk memfasilitasi pencarian berbasis konten.
 
