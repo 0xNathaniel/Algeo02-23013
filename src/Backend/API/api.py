@@ -190,6 +190,42 @@ async def process_files(files: list[UploadFile], target_dir: str, supported_file
 
     return processed_files
 
+async def process_files(files: list[UploadFile], target_dir: str, supported_files: tuple):
+    """
+    Process and save uploaded files to the target directory.
+    Does not clear the directory on every call but checks file types and saves valid files.
+    """
+    # Ensure the target directory exists
+    os.makedirs(target_dir, exist_ok=True)
+
+    processed_files = {
+        "files": [],
+        "extracted_files": []
+    }
+
+    for file in files:
+        temp_file_path = os.path.join(target_dir, file.filename)
+
+        # Save the uploaded file temporarily
+        with open(temp_file_path, "wb") as temp_file:
+            shutil.copyfileobj(file.file, temp_file)
+
+        # Check the file type
+        if file.filename.endswith(supported_files):
+            processed_files["files"].append(temp_file_path)
+        elif file.filename.endswith(SUPPORTED_ARCHIVES):
+            try:
+                extracted_files = extract_file(temp_file_path, target_dir)
+                processed_files["extracted_files"] += extracted_files
+            except ValueError as e:
+                os.remove(temp_file_path)  # Clean up invalid archive
+                raise HTTPException(status_code=400, detail=str(e))
+        else:
+            os.remove(temp_file_path)  # Remove unsupported file
+            raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.filename}")
+
+    return processed_files
+
 def midi_to_mp3_fixed_paths(midi_file_path):
     filename_without_ext = os.path.splitext(os.path.basename(midi_file_path))[0]
 
@@ -311,11 +347,13 @@ async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
     global image_files, principal_components, image_projections  # To update the global variables
 
     if not isinstance(files, list):
-        files = [files]
+        files = [files]  # Ensure `files` is a list
 
     try:
+        # Process uploaded image files
         processed_files = await process_files(files, IMAGE_DIRECTORY, SUPPORTED_IMAGE_FILES)
 
+        # Re-process the database of images after uploading new files
         image_files, principal_components, image_projections = preprocess_database_images(
             IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS
         )
@@ -333,9 +371,10 @@ async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
 @app.post("/upload-music/")
 async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
     if not isinstance(files, list):
-        files = [files] 
+        files = [files]  # Ensure `files` is a list
 
     try:
+        # Process uploaded music files
         processed_files = await process_files(files, AUDIO_DIR, SUPPORTED_AUDIO_FILES)
         return JSONResponse(content={
             "message": "Music files successfully uploaded and processed.",
@@ -345,6 +384,7 @@ async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the uploaded music files: {str(e)}")
+
     
 @app.post("/convert-midi/")
 async def convert_midi_files(file_name: str = None):
