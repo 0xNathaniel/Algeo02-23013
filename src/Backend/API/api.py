@@ -8,6 +8,7 @@ import io
 import sys
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
+from typing import Union
 from PIL import Image
 from mido import MidiFile
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Album Picture Finder")))
@@ -16,6 +17,18 @@ from cache import preprocess_database_images
 from mapper import load_mapper
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Music information Retrieval")))
 from find_most_similar import find_most_similar
+
+from fastapi.middleware.cors import CORSMiddleware
+
+# FastAPI app
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Directories and constants
 ALBUM_DIR = "../../Frontend/public/Data/Album Dataset"
@@ -261,7 +274,10 @@ async def upload_mapper_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Error processing the file: {str(e)}")
 
 @app.post("/upload-images/")
-async def upload_images(files: list[UploadFile] = File(...)):
+async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
+    if not isinstance(files, list):
+        files = [files]  # Wrap single file in a list
+
     try:
         processed_files = await process_files(files, ALBUM_DIR, SUPPORTED_IMAGE_FILES)
         return JSONResponse(content={
@@ -274,7 +290,10 @@ async def upload_images(files: list[UploadFile] = File(...)):
         raise HTTPException(status_code=500, detail=f"Error processing the uploaded image files: {str(e)}")
 
 @app.post("/upload-music/")
-async def upload_music(files: list[UploadFile] = File(...)):
+async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
+    if not isinstance(files, list):
+        files = [files]  # Wrap single file in a list
+
     try:
         processed_files = await process_files(files, AUDIO_DIR, SUPPORTED_AUDIO_FILES)
         return JSONResponse(content={
