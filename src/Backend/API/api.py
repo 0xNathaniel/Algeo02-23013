@@ -252,7 +252,7 @@ async def find_similar_midi(query_midi: UploadFile = File(...)):
                 "pic_name": pic_name,
                 "audio_file": audio_file,
                 "audio_name": audio_name,
-                "similarities": similarity
+                "similarity_percentage": similarity
             })
         
         return JSONResponse(content={"similar_audio_files": results})
