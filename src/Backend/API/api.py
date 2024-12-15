@@ -11,7 +11,6 @@ from fastapi.responses import JSONResponse
 from typing import Union
 from PIL import Image
 from mido import MidiFile
-import fluidsynth
 from pydub import AudioSegment
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Album Picture Finder/")))
 from retrieval_and_output import preprocess_query_image, output_similarity
@@ -371,24 +370,14 @@ async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
         raise HTTPException(status_code=500, detail=f"Error processing the uploaded music files: {str(e)}")
 
 @app.post("/convert-midi/")
-async def convert_all_midi_files():
+async def convert_midi_files():
     try:
-        if not os.path.exists(MIDI_DIRECTORY):
+        if not os.pathexists(MIDI_DIRECTORY):
             raise HTTPException(status_code=400, detail="MIDI directory does not exist.")
 
-        midi_files = [os.path.join(root, file)
-                      for root, _, files in os.walk(MIDI_DIRECTORY)
-                      for file in files if file.endswith((".mid", ".midi"))]
-
-        if not midi_files:
-            raise HTTPException(status_code=400, detail="No MIDI files found in the directory.")
-
-        for midi_file in midi_files:
-            print(f"Processing: {midi_file}")
-            midi_to_mp3_fixed_paths(midi_file)
+        convert_all_mid_to_mp3(MIDI_DIRECTORY)
 
         return JSONResponse(content={"message": "All MIDI files in the directory have been successfully converted to MP3."})
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during conversion: {e}")
-
