@@ -6,6 +6,9 @@ import FinderCard from "@/components/FinderCard";
 import Left from "@/public/panahkiri.png";
 import Right from "@/public/panahkanan.png";
 import axios from "axios";
+import * as Tone from "tone";
+import { Midi } from "@tonejs/midi";
+
 
 const ITEMS_PER_PAGE = 6;
 
@@ -132,6 +135,49 @@ const page = () => {
       setMessage("An error occurred while uploading the mapper file.");
     }
   };
+  const audioPath = "/Data/Dataset/audio_4.midi";
+
+  // const playMidi = async () => {
+  //   try {
+  //     const response = await fetch(audioPath); // Fetch the MIDI file
+  //     const arrayBuffer = await response.arrayBuffer(); // Get the ArrayBuffer
+  //     const midi = new Midi(arrayBuffer); // Parse the MIDI file
+  
+  //     console.log("Parsed MIDI:", midi); // Debug parsed MIDI
+  
+  //     const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+  
+  //     // Iterate over tracks and play notes
+  //     midi.tracks.forEach((track) => {
+  //       track.notes.forEach((note) => {
+  //         synth.triggerAttackRelease(note.name, note.duration, note.time);
+  //       });
+  //     });
+  
+  //     await Tone.start();
+  //     console.log("MIDI playback started!");
+  //   } catch (error) {
+  //     console.error("Error playing MIDI:", error);
+  //     setMessage("An error occurred while playing the MIDI file.");
+  //   }
+  // };
+  const [audio] = useState(
+    typeof Audio !== "undefined" ? new Audio("/Data/Dataset/audio1.mp3") : null
+  );
+
+  const playAudio = () => {
+    if (audio) {
+      audio.play();
+    }
+  };
+
+  const pauseAudio = () => {
+    if (audio) {
+      audio.pause();
+    }
+  };
+  
+  
 
   const handleFileChange = (event) => setFile(event.target.files[0]);
   const handleZipFileChange = (event) => setZipFile(event.target.files[0]);
@@ -143,6 +189,11 @@ const page = () => {
       <div className="bg-[#1E2567] text-white h-full p-10 flex flex-col justify-center items-center">
         <h1 className="text-4xl font-lora-bold">Upload Here!</h1>
         <FinderCard image={file ? URL.createObjectURL(file) : null} name={file?.name || "No file selected"} />
+
+        <div>
+          <button onClick={playAudio}>Play Audio</button>
+          <button onClick={pauseAudio}>Pause Audio</button>
+        </div>
 
         {/* Upload Form */}
         <form onSubmit={handleUpload} className="flex items-center gap-2 mb-2">
