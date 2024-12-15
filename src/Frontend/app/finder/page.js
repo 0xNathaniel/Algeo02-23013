@@ -20,7 +20,7 @@ const page = () => {
   const [audioFile, setAudioFile] = useState(null); 
   const [mapperFile, setMapperFile] = useState(null); // Mapper file to be uploaded
   const [message, setMessage] = useState(null);
-
+  const [executionTime, setExecutionTime] = useState(null); // Execution time for current API response
   const [imagePreview, setImagePreview] = useState(null); // Preview image for FinderCard
 
   const handleFileChange = (event) => {
@@ -94,6 +94,7 @@ const page = () => {
 
         const result = response.data.similar_images;
         setAlbumResponse(result);
+        setExecutionTime(response.data.execution_time);
         setMessage("Image file processed successfully!");
       } else if (["mid", "midi"].includes(fileExtension)) {
         // API for MIDI files
@@ -105,6 +106,7 @@ const page = () => {
 
         const result = response.data.similar_audio_files;
         setMidiResponse(result);
+        setExecutionTime(response.data.execution_time);
         setMessage("MIDI file processed successfully!");
       } else {
         setMessage("Unsupported file type. Please upload an image or MIDI file.");
@@ -211,6 +213,7 @@ const page = () => {
   const handleAudioFileChange = (event) => setAudioFile(event.target.files[0]);
   const handleMapperFileChange = (event) => setMapperFile(event.target.files[0]);
 
+  
   return (
     <div className="bg-[#F5F5F5] pt-[50px]">
       {/* Upload Section */}
@@ -320,7 +323,7 @@ const page = () => {
       </div>
 
       {/* Results Section */}
-      <div className="py-10 md:px-[250px] text-white flex flex-col items-center justify-center">
+      <div className="py-10  text-white flex flex-col items-center justify-center">
         <div className="text-2xl flex space-x-2">
           <button
             className={`py-2 px-5 rounded-lg ${
@@ -348,8 +351,9 @@ const page = () => {
                 <FinderCard
                   key={index}
                   image={`/Data/Album Dataset/${data.pic_name}`}
-                  name={data.pic_name}
+                  name={data.audio_name}
                   percentage={data.similarity_percentage}
+                  audio={data.audio_file}
                 />
               ))
             ) : (
@@ -362,6 +366,7 @@ const page = () => {
               image={`/Data/Album Dataset/${data.pic_name}`}
               name={data.audio_name}
               percentage={data.similarity_percentage}
+              audio={data.audio_file}
             />
             ))
           ) : (
@@ -391,6 +396,18 @@ const page = () => {
             <Image src={Right} width={20} alt="arrow" />
           </button>
         </div>
+
+        {currentView === "album" ? (
+          <div className="flex space-x-10 text-[#1E2567]">
+            <div>Total Output: {albumResponse.length}</div>
+            <div>Processing Time: {executionTime ? executionTime.toFixed(2) : "-"} s</div>
+          </div>
+        ) : (
+          <div className="flex space-x-10 text-[#1E2567]">
+            <div>Total Output: {midiResponse.length}</div>
+            <div>Processing Time: {executionTime ? executionTime.toFixed(2) : "-"} seconds</div>
+          </div>
+        )}
       </div>
     </div>
   );
