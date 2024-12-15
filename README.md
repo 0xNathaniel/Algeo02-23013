@@ -1,7 +1,5 @@
 # Algeo02-23013
 
-![Broken Home Logo](img/BrokenHomeLogo.png)
-
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)
 ![OS](https://img.shields.io/badge/os-windows%20%7C%20apple%20%7C%20linux-lightgrey?logo=linux&logoColor=white)
 ![npm](https://img.shields.io/badge/npm-10.8.2-red?logo=npm&logoColor=white)
@@ -14,6 +12,9 @@
 ![Pillow](https://img.shields.io/badge/pillow-11.0.0-pink?logo=python&logoColor=white)
 ![py7zr](https://img.shields.io/badge/py7zr-0.22.0-darkgreen?logo=archive&logoColor=white)
 ![rarfile](https://img.shields.io/badge/rarfile-4.2-darkblue?logo=file-archive&logoColor=white)
+
+
+![Broken Home Logo](img/BrokenHomeLogo.png)
 
 **Aplikasi BrokenHome: Album Picture Finder dan Music Information Retrieval** adalah solusi berbasis **Information Retrieval** yang dirancang untuk menemukan gambar album musik dan file audio yang memiliki kesamaan dengan data yang diunggah pengguna. Aplikasi ini mengimplementasikan algoritma pemrosesan gambar dan audio untuk memfasilitasi pencarian berbasis konten.
 
