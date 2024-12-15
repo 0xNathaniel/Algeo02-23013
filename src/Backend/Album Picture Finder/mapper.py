@@ -2,15 +2,13 @@ import os
 
 MAPPER_FILE = "src/Backend/Album Picture Finder/mapper.txt"
 
-# Load mapper file into a dictionary
 def load_mapper(mapper_file):
     print("Loading mapper...")
-    
+
     mapper = {}
     try:
         with open(mapper_file, "r") as file:
             for line_number, line in enumerate(file, start=1):
-                # Skip the header line
                 if line_number == 1:
                     continue
                 stripped_line = line.strip()
@@ -18,9 +16,11 @@ def load_mapper(mapper_file):
                     print(f"Skipping empty line {line_number}")
                     continue
                 try:
-                    # Expecting `audio_file pic_name` structure
-                    audio_file, pic_name = stripped_line.split()
-                    mapper[pic_name] = audio_file
+                    audio_file, audio_name, pic_name = stripped_line.split()
+                    mapper[pic_name] = {
+                        "audio_file": audio_file,
+                        "audio_name": audio_name
+                    }
                 except ValueError:
                     print(f"Skipping invalid line {line_number}: {stripped_line}")
     except FileNotFoundError:
@@ -29,4 +29,10 @@ def load_mapper(mapper_file):
     except Exception as e:
         print(f"Error reading mapper file: {e}")
         raise
+
     return mapper
+
+if __name__ == "__main__":
+    mapper = load_mapper(MAPPER_FILE)
+    for pic_name, info in mapper.items():
+        print(f"Picture: {pic_name}, Audio File: {info['audio_file']}, Audio Name: {info['audio_name']}")
