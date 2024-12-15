@@ -1,0 +1,4 @@
+1. Apa fungsi normalisasi nada (NP) di sini (terutama untuk RTB dan FT B)? Padahal selisih nada sudah pasti memenuhi format [-127..127], dan dari kunci manapun nada dimainkan, selisih tetap sama.
+2. Bagaimana format penerimaan RTB dan FTB di sini? Apakah benar seperti yang sudah dilakukan (array of selisih nada).
+3. Apakah cara yang kami lakukan (melakukan append 0 sampai panjang 2 array sama) benar untuk melakukan perhitungan cosine similarity?
+4. Pada file terdapat permintaan bahwa program dapat merekognisi melodi utama lagu (biasanya pada channel 1), apakah berarti kami harus menggunakan channel 1? Ataukah kami boleh menentukan nada utama dari channel-channel lain?

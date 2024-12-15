@@ -6,7 +6,7 @@ from data_centering import standardize_data
 from pca import perform_svd, get_principal_components, project_images
 
 # Local cache file 
-CACHE_FILE = "../Albumalbum_picture_finder_cache.txt"
+CACHE_FILE = "../Album Picture Finder/album_picture_finder_cache.txt"
 
 def calculate_dataset_hash(image_files, image_directory):
     hash_md5 = hashlib.md5()

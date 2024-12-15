@@ -1,6 +1,6 @@
+import os
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-import os
 from PIL import Image
 from retrieval_and_output import preprocess_query_image, output_similarity
 from cache import preprocess_database_images
@@ -9,7 +9,7 @@ from mapper import load_mapper
 # FastAPI app
 app = FastAPI()
 
-# Parameters 
+# Parameters
 IMAGE_DIRECTORY = "../../Data/Dataset"
 MAPPER_FILE = "../../Data/mapper.txt"
 RESIZE_DIM = 64  # Number of pixels (for image resizing)
@@ -31,47 +31,37 @@ mapper = load_mapper(MAPPER_FILE)
 image_files, mean, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
 
 # API endpoint
-@app.post("/finder/")
+@app.post("/image/")
 async def find_similar_images(query_image: UploadFile = File(...)):
     try:
-        # Ensure the query image is valid
         if not query_image.filename.lower().endswith(('png', 'jpg', 'jpeg')):
             raise HTTPException(status_code=400, detail="Invalid image format. Supported formats are: PNG, JPG, JPEG.")
         
-        # Preprocess query image
         query_image = Image.open(query_image.file)
         query_projection = preprocess_query_image(mean, query_image, RESIZE_DIM, principal_components)
-        
-        # Calculate similarity (Euclidean distance)
         distances, _, top_n_indices = output_similarity(query_projection, image_projections, len(image_files))
-        
-        # Normalize the distances to percentages (0 - 100%)
-        min_distance = min(distances)
-        max_distance = max(distances)
-        similarity_percentages = [
-            100 * (1 - (dist - min_distance) / (max_distance - min_distance)) for dist in distances
-        ]
-        
-        # Prepare the results with similarity percentages
+
         results = []
-        for index, similarity_percentage in zip(top_n_indices, similarity_percentages):
+        for rank, index in enumerate(top_n_indices):
             pic_name = image_files[index]
             audio_file = mapper.get(pic_name, "Unknown")
             results.append({
+                "rank": rank + 1,
                 "pic_name": pic_name,
                 "audio_file": audio_file,
-                "similarity_percentage": round(similarity_percentage, 2),
+                "distance": distances[index],
             })
         
-        # Sort the results by similarity_percentage in descending order
-        results_sorted = sorted(results, key=lambda x: x['similarity_percentage'], reverse=True)
+        #min_distance = min([result['distance'] for result in results])
+        max_distance = max([result['distance'] for result in results])
+        similarity_percentages = [
+            100 * (1 - (result['distance']) / (max_distance)) for result in results
+        ]
         
-        # Select only the top N results
-        top_n_results = results_sorted[:TOP_N_IMAGES]
-        
-        # Assign ranks based on sorted results
-        for i, result in enumerate(top_n_results):
-            result['rank'] = i + 1
+        for i, result in enumerate(results):
+            result['similarity_percentage'] = round(similarity_percentages[i], 2)
+       
+        top_n_results = results[:TOP_N_IMAGES]
         
         return JSONResponse(content={"similar_images": top_n_results})
     
