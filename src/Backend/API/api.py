@@ -11,6 +11,8 @@ from fastapi.responses import JSONResponse
 from typing import Union
 from PIL import Image
 from mido import MidiFile
+import fluidsynth
+from pydub import AudioSegment
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Album Picture Finder/")))
 from retrieval_and_output import preprocess_query_image, output_similarity
 from cache import preprocess_database_images
@@ -43,17 +45,19 @@ RESIZE_DIM = 64
 N_COMPONENTS = 8
 TOP_N_IMAGES = 30
 MAPPER_FILE_PATH = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../Frontend/public/Data/")), "mapper.txt")
+MIDI_DIRECTORY = "../../Frontend/public/Data/MIDI Files"
+SOUNDFONT_PATH = "../../Frontend/public/Audio Sample/general_audio_sample.sf2"
+OUTPUT_DIRECTORY = "../../Frontend/public/Convert Result"
 
 dataset_midis = []
 album_mapper = load_mapper_album(MAPPER_FILE)
 music_mapper = load_mapper_music(MAPPER_FILE)
 
+
 # Ensure directories exist
-# Check if the IMAGE_DIRECTORY exists
 if not os.path.exists(IMAGE_DIRECTORY):
     raise FileNotFoundError(f"The specified image directory does not exist: {IMAGE_DIRECTORY}")
 
-# Check if the MAPPER_FILE exists
 if not os.path.exists(MAPPER_FILE):
     raise FileNotFoundError(f"The specified mapper file does not exist: {MAPPER_FILE}")
 
@@ -61,8 +65,13 @@ if not os.path.exists(MAPPER_FILE):
     raise FileNotFoundError(f"The specified mapper file does not exist: {MAPPER_FILE}")
 
 image_files, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
-# Utility Functions
 
+
+# Ensure output directory exists
+os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
+
+
+# Utility Functions
 def validate_mapper_format(file_content: str):
     lines = file_content.strip().split("\n")
 
@@ -163,11 +172,9 @@ async def process_files(files: list[UploadFile], target_dir: str, supported_file
     for file in files:
         temp_file_path = os.path.join(target_dir, file.filename)
 
-        # Save the uploaded file temporarily
         with open(temp_file_path, "wb") as temp_file:
             shutil.copyfileobj(file.file, temp_file)
 
-        # Check the file type
         if file.filename.endswith(supported_files):
             processed_files["files"].append(save_file(file, target_dir))
         elif file.filename.endswith(SUPPORTED_ARCHIVES):
@@ -179,10 +186,35 @@ async def process_files(files: list[UploadFile], target_dir: str, supported_file
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.filename}")
 
-        # Remove the temporary file
         os.remove(temp_file_path)
 
     return processed_files
+
+def midi_to_mp3_fixed_paths(midi_file_path):
+    filename_without_ext = os.path.splitext(os.path.basename(midi_file_path))[0]
+
+    output_mp3_path = os.path.join(OUTPUT_DIRECTORY, f"{filename_without_ext}.mp3")
+    temp_wav_path = os.path.join(OUTPUT_DIRECTORY, f"{filename_without_ext}.wav")
+
+    try:
+        fs = fluidsynth.Synth()
+        fs.start(driver="file", filename=temp_wav_path)
+        fs.sfload(SOUNDFONT_PATH)
+        fs.midi_file_play(midi_file_path)
+        fs.delete()
+
+        sound = AudioSegment.from_wav(temp_wav_path)
+        sound.export(output_mp3_path, format="mp3")
+
+        return output_mp3_path
+
+    except Exception as e:
+        raise Exception(f"Error converting {midi_file_path} to MP3: {e}")
+
+    finally:
+        if os.path.exists(temp_wav_path):
+            os.remove(temp_wav_path)
+
 
 # API Endpoints
 @app.post("/image/")
@@ -209,7 +241,6 @@ async def find_similar_images(query_image: UploadFile = File(...)):
                 "distance": distances[index],
             })
         
-        #min_distance = min([result['distance'] for result in results])
         max_distance = max([result['distance'] for result in results])
         similarity_percentages = [
             100 * (1 - (result['distance']) / (max_distance)) for result in results
@@ -228,19 +259,15 @@ async def find_similar_images(query_image: UploadFile = File(...)):
 @app.post("/music/")
 async def find_similar_midi(query_midi: UploadFile = File(...)):
     try:
-        # Validate file extension
         if not (query_midi.filename.endswith(".mid") or query_midi.filename.endswith(".midi")):
             raise HTTPException(status_code=400, detail="Invalid file type. Only .mid or .midi files are allowed.")
         
-        # Read uploaded file as bytes
         query_midi_bytes = await query_midi.read()
         
-        # Wrap the bytes in a BytesIO object
         query_midi_filelike = io.BytesIO(query_midi_bytes)
 
         query_midi_obj = MidiFile(file=query_midi_filelike)
         
-        # Call the modified find_most_similar function
         similarities = find_most_similar(query_midi_obj, dataset_midis)
         results = []
         for rank, audio_file, similarity in similarities:
@@ -281,13 +308,20 @@ async def upload_mapper_file(file: UploadFile = File(...)):
 
 @app.post("/upload-images/")
 async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
+    global image_files, principal_components, image_projections  # To update the global variables
+
     if not isinstance(files, list):
-        files = [files]  # Wrap single file in a list
+        files = [files]
 
     try:
         processed_files = await process_files(files, IMAGE_DIRECTORY, SUPPORTED_IMAGE_FILES)
+
+        image_files, principal_components, image_projections = preprocess_database_images(
+            IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS
+        )
+
         return JSONResponse(content={
-            "message": "Image files successfully uploaded and processed.",
+            "message": "Image files successfully uploaded and database re-processed.",
             "processed_files": processed_files
         })
     except HTTPException as e:
@@ -295,10 +329,11 @@ async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the uploaded image files: {str(e)}")
 
+
 @app.post("/upload-music/")
 async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
     if not isinstance(files, list):
-        files = [files]  # Wrap single file in a list
+        files = [files] 
 
     try:
         processed_files = await process_files(files, AUDIO_DIR, SUPPORTED_AUDIO_FILES)
@@ -310,3 +345,31 @@ async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the uploaded music files: {str(e)}")
+    
+@app.post("/convert-midi/")
+async def convert_midi_files(file_name: str = None):
+    try:
+        if not os.path.exists(MIDI_DIRECTORY):
+            raise HTTPException(status_code=400, detail="MIDI directory does not exist.")
+
+        midi_files = [os.path.join(MIDI_DIRECTORY, f) for f in os.listdir(MIDI_DIRECTORY) if f.endswith((".mid", ".midi"))]
+
+        if file_name:
+            file_path = os.path.join(MIDI_DIRECTORY, file_name)
+            if not os.path.exists(file_path):
+                raise HTTPException(status_code=400, detail=f"File {file_name} not found in the MIDI directory.")
+            converted_file = midi_to_mp3_fixed_paths(file_path)
+            return JSONResponse(content={"message": f"Converted {file_name} to MP3.", "file": converted_file})
+
+        if not midi_files:
+            raise HTTPException(status_code=400, detail="No MIDI files found in the directory.")
+
+        converted_files = []
+        for midi_file in midi_files:
+            converted_file = midi_to_mp3_fixed_paths(midi_file)
+            converted_files.append(converted_file)
+
+        return JSONResponse(content={"message": "All MIDI files converted to MP3.", "files": converted_files})
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during conversion: {e}")
