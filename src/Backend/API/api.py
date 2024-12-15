@@ -55,16 +55,26 @@ music_mapper = load_mapper_music(MAPPER_FILE)
 
 
 # Ensure directories exist
-if not os.path.exists(IMAGE_DIRECTORY):
-    raise FileNotFoundError(f"The specified image directory does not exist: {IMAGE_DIRECTORY}")
+try:
+    if os.listdir(IMAGE_DIRECTORY):  # Check if the directory is not empty
+        image_files, principal_components, image_projections = preprocess_database_images(
+            IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS
+        )
+    else:
+        # If the directory is empty, initialize with empty values
+        image_files, principal_components, image_projections = [], None, None
+        print(f"Warning: The image directory {IMAGE_DIRECTORY} is empty.")
+except Exception as e:
+    # Handle any unexpected errors during initialization
+    print(f"Error initializing image processing: {e}")
+    image_files, principal_components, image_projections = [], None, None
+
 
 if not os.path.exists(MAPPER_FILE):
     raise FileNotFoundError(f"The specified mapper file does not exist: {MAPPER_FILE}")
 
 if not os.path.exists(MAPPER_FILE):
     raise FileNotFoundError(f"The specified mapper file does not exist: {MAPPER_FILE}")
-
-image_files, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
 
 
 # Ensure output directory exists
@@ -255,6 +265,12 @@ def midi_to_mp3_fixed_paths(midi_file_path):
 # API Endpoints
 @app.post("/image/")
 async def find_similar_images(query_image: UploadFile = File(...)):
+    if not image_files or not principal_components or not image_projections:
+        raise HTTPException(
+            status_code=400, 
+            detail="The album dataset is empty. Please upload images to the dataset first."
+        )
+
     try:
         if not query_image.filename.lower().endswith(('png', 'jpg', 'jpeg')):
             raise HTTPException(status_code=400, detail="Invalid image format. Supported formats are: PNG, JPG, JPEG.")
@@ -291,6 +307,7 @@ async def find_similar_images(query_image: UploadFile = File(...)):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the query image: {str(e)}")
+
 
 @app.post("/music/")
 async def find_similar_midi(query_midi: UploadFile = File(...)):
@@ -354,9 +371,14 @@ async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
         processed_files = await process_files(files, IMAGE_DIRECTORY, SUPPORTED_IMAGE_FILES)
 
         # Re-process the database of images after uploading new files
-        image_files, principal_components, image_projections = preprocess_database_images(
-            IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS
-        )
+        if os.listdir(IMAGE_DIRECTORY):  # Ensure the directory is not empty
+            image_files, principal_components, image_projections = preprocess_database_images(
+                IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS
+            )
+        else:
+            # If no images exist, reset to default empty values
+            image_files, principal_components, image_projections = [], None, None
+            print(f"Warning: The image directory {IMAGE_DIRECTORY} is still empty after upload.")
 
         return JSONResponse(content={
             "message": "Image files successfully uploaded and database re-processed.",
@@ -366,7 +388,6 @@ async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the uploaded image files: {str(e)}")
-
 
 @app.post("/upload-music/")
 async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
