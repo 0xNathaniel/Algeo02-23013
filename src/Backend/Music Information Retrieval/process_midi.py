@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 def transpose_to_c(note):
-    transpose_amount = (60 - note) % 12  # Hitung pergeseran ke C (60)
+    transpose_amount = (60 - note) % 12
     return transpose_amount
 
 def normalize_length(RTB1, RTB2, FTB1, FTB2):
