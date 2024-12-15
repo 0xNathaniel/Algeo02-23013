@@ -177,9 +177,10 @@ async def upload_mapper_file(file: UploadFile = File(...)):
 
         with open(MAPPER_FILE_PATH, "w") as f:
             for line in valid_lines:
-                f.write(line + "\n")
+                f.write(line)
         
         return JSONResponse(content={"message": "Mapper file successfully uploaded and saved to 'mapper.txt'."})
+    
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
