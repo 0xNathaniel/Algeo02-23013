@@ -32,7 +32,3 @@ def load_mapper_album(mapper_file):
 
     return mapper
 
-if __name__ == "__main__":
-    mapper = load_mapper(MAPPER_FILE)
-    for pic_name, info in mapper.items():
-        print(f"Picture: {pic_name}, Audio File: {info['audio_file']}, Audio Name: {info['audio_name']}")

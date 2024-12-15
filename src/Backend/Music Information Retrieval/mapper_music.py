@@ -31,8 +31,3 @@ def load_mapper_music(mapper_file):
         raise
 
     return mapper
-
-if __name__ == "__main__":
-    mapper = load_mapper(MAPPER_FILE)
-    for audio_file, info in mapper.items():
-        print(f"Audio: {audio_file}, Audio File: {info['audio_name']}, Audio Name: {info['pic_name']}")

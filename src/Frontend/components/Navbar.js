@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 const Navbar = () => {
   const pathname = usePathname();
     return (
-        <nav className="bg-[#646A9F] w-full h-[70px] flex items-center justify-between px-10">
+        <nav className="bg-[#9CA0C7] w-full h-[70px] flex items-center justify-between px-10">
             <div className=''>
               <Image
               src = {TextLogo}
@@ -18,26 +18,26 @@ const Navbar = () => {
               alt="TextLogo"
               />
             </div>
-            <div className='flex '>
+            <div className='flex space-x-2'>
               <Link href='/' className='mx-2'>
-              <button className={`flex text-white w-full rounded-md px-5 py-2 mx-2 bg-[#646A9F] hover:bg-[#F3C081] items-center justify-center ${pathname ==='/' ? 'bg-[#F4992A]' : 'bg-[#646A9F]'}`}>
+              <button className={`flex text-white w-full rounded-md px-5 py-2 bg-[#9CA0C7] hover:bg-[#8C90BC] items-center justify-center ${pathname ==='/' ? 'bg-[#646A9F]' : 'bg-[#9CA0C7]'}`}>
                 <Image
                 src = {Home}
                 width={30}
                 alt="Home"
                 />
-                <p className='ml-4 text-2xl hidden md:block'>Home</p>
+                <p className='ml-4 text-xl hidden md:block'>Home</p>
               </button>
               </Link>
 
               <Link href='/finder' className='mx-2'>
-              <button className={`flex text-white w-full rounded-md  px-5 py-2 mx-2 bg-[#646A9F] hover:bg-[#F3C081] items-center justify-center ${pathname ==='/' ? 'bg-[#646A9F]' : 'bg-[#F4992A]'}`}>
+              <button className={`flex text-white w-full rounded-md  px-5 py-2 bg-[#9CA0C7] hover:bg-[#8C90BC] items-center justify-center ${pathname ==='/' ? 'bg-[#9CA0C7]' : 'bg-[#646A9F]'}`}>
                 <Image
                 src = {Search}
                 width={30}
                 alt="Finder"
                 />
-                <p className='ml-4 text-2xl hidden md:block'>Finder</p>
+                <p className='ml-4 text-xl hidden md:block'>Finder</p>
               </button>
               </Link>
             </div>
