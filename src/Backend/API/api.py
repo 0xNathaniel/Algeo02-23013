@@ -188,8 +188,8 @@ async def upload_mapper_file(file: UploadFile = File(...)):
 def validate_mapper_format(file_content: str):
     lines = file_content.strip().split("\n")
     
-    if lines[0].strip() != "audio_file pic_name":
-        raise ValueError("Invalid file format. The first line must be 'audio_file pic_name'.")
+    if lines[0].strip() != "audio_file audio_name pic_name":
+        raise ValueError("Invalid file format. The first line must be 'audio_file audio_name pic_name'.")
     
     for line in lines[1:]:
         columns = line.strip().split()
