@@ -30,6 +30,10 @@ async def load_dataset_midis():
 @app.post("/music/")
 async def find_similar_midi(query_midi: UploadFile = File(...)):
     try:
+        # Validate file extension
+        if not (query_midi.filename.endswith(".mid") or query_midi.filename.endswith(".midi")):
+            raise HTTPException(status_code=400, detail="Invalid file type. Only .mid or .midi files are allowed.")
+        
         # Read uploaded file as bytes
         query_midi_bytes = await query_midi.read()
         
