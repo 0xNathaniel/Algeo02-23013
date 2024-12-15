@@ -31,7 +31,7 @@ mapper = load_mapper(MAPPER_FILE)
 image_files, mean, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
 
 # API endpoint
-@app.post("/finder/")
+@app.post("/image/")
 async def find_similar_images(query_image: UploadFile = File(...)):
     try:
         if not query_image.filename.lower().endswith(('png', 'jpg', 'jpeg')):
