@@ -4,13 +4,21 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from mido import MidiFile
 from find_most_similar import find_most_similar
+from fastapi.middleware.cors import CORSMiddleware
 from mapper import load_mapper
 
 # FastAPI app
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Parameters
-MIDI_DIRECTORY = "../../Data/Dataset"
+MIDI_DIRECTORY = "../../Frontend/public/Data/Dataset"
 MAPPER_FILE = "../../Data/mapper.txt"
 
 # Preload dataset MIDI files at startup

@@ -5,14 +5,22 @@ from PIL import Image
 from retrieval_and_output import preprocess_query_image, output_similarity
 from cache import preprocess_database_images
 from mapper import load_mapper
+from fastapi.middleware.cors import CORSMiddleware
 
 # FastAPI app
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Parameters
-IMAGE_DIRECTORY = "../../Data/Dataset"
-MAPPER_FILE = "../../Data/mapper.txt"
 RESIZE_DIM = 64  # Number of pixels (for image resizing)
+IMAGE_DIRECTORY = "../../Frontend/public/Data/Dataset"
+MAPPER_FILE = "../../Frontend/public/Data/mapper.txt"
 N_COMPONENTS = 8  # Number of principal components
 TOP_N_IMAGES = 30  # Number of top similar images to return
 
