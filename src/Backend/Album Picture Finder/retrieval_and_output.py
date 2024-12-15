@@ -6,11 +6,11 @@ from data_centering import standardize_data
 from pca import perform_svd, get_principal_components, project_images
 from similarity import calculate_euclidean_distance
 
-def preprocess_query_image(mean, query_image, resize_dim, principal_components):
+def preprocess_query_image(query_image, resize_dim, principal_components):
     grayscale_image = query_image.convert('L')
     resized_image = grayscale_image.resize((resize_dim, resize_dim))
     query_image_array = np.array(resized_image).flatten()
-    query_image_standardized = query_image_array - mean
+    query_image_standardized = query_image_array - np.mean(query_image_array)
     query_projection = np.dot(query_image_standardized, principal_components.T)
     
     return query_projection

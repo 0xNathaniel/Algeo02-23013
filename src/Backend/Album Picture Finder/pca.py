@@ -1,6 +1,6 @@
 import numpy as np
 
-def perform_svd(images, n_components):
+def perform_svd(images):
     print("Performing SVD...")
     
     U, S, Vt = np.linalg.svd(images, full_matrices=False)

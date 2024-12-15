@@ -100,14 +100,14 @@ def preprocess_database_images(image_directory, resize_dim, n_components):
         else:
             print("Recomputing data...")
             standardized_images, mean = standardize_data(images)
-            _, _, eigenvector = perform_svd(standardized_images, n_components)
+            _, _, eigenvector = perform_svd(standardized_images)
             principal_components = get_principal_components(eigenvector, n_components)
             image_projections = project_images(standardized_images, principal_components)
             
             # Save to cache
             save_cache(metadata, mean, principal_components, image_projections, dataset_hash)
         
-        return image_files, mean, principal_components, image_projections
+        return image_files, principal_components, image_projections
     except Exception as e:
         print(f"Error during preprocessing: {e}")
         raise

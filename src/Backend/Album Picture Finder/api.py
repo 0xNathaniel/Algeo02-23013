@@ -28,7 +28,7 @@ if not os.path.exists(MAPPER_FILE):
 mapper = load_mapper(MAPPER_FILE)
 
 # Preload and preprocess database images
-image_files, mean, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
+image_files, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
 
 # API endpoint
 @app.post("/image/")
@@ -38,7 +38,7 @@ async def find_similar_images(query_image: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail="Invalid image format. Supported formats are: PNG, JPG, JPEG.")
         
         query_image = Image.open(query_image.file)
-        query_projection = preprocess_query_image(mean, query_image, RESIZE_DIM, principal_components)
+        query_projection = preprocess_query_image(query_image, RESIZE_DIM, principal_components)
         distances, _, top_n_indices = output_similarity(query_projection, image_projections, len(image_files))
 
         results = []

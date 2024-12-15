@@ -15,10 +15,10 @@ top_n_images = 6 # # Number of top similar images to return
 
 def main():
     # Load and process database images
-    image_files, mean, principal_components, image_projections = preprocess_database_images(image_directory, resize_dim, n_components)
+    image_files, principal_components, image_projections = preprocess_database_images(image_directory, resize_dim, n_components)
     # Load and process the query image
     query_image = Image.open(os.path.join(image_directory, query_image_name)).convert('L')
-    query_projection = preprocess_query_image(mean, query_image, resize_dim, principal_components)
+    query_projection = preprocess_query_image(query_image, resize_dim, principal_components)
     # Calculate similarity (Euclidean distance)
     distances, _, top_n_indices = output_similarity(query_projection, image_projections, top_n_images)
     
