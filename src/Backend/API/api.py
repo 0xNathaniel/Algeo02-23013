@@ -1,4 +1,5 @@
 import os
+import time
 import tarfile
 import zipfile
 import rarfile
@@ -233,7 +234,8 @@ async def process_files(files: list[UploadFile], target_dir: str, supported_file
 async def find_similar_images(query_image: UploadFile = File(...)):
     global image_files, principal_components, image_projections
     
-    # Explicitly check for empty or None values in datasets
+    start_time = time.perf_counter()
+    
     if not image_files or len(image_files) == 0:
         raise HTTPException(
             status_code=400, 
@@ -251,15 +253,12 @@ async def find_similar_images(query_image: UploadFile = File(...)):
         )
 
     try:
-        # Validate image format
         if not query_image.filename.lower().endswith(('png', 'jpg', 'jpeg')):
             raise HTTPException(status_code=400, detail="Invalid image format. Supported formats are: PNG, JPG, JPEG.")
         
-        # Open and preprocess the query image
         query_image = Image.open(query_image.file)
         query_projection = preprocess_query_image(query_image, RESIZE_DIM, principal_components)
         
-        # Calculate similarity and get top-N results
         distances, _, top_n_indices = output_similarity(query_projection, image_projections, len(image_files))
 
         results = []
@@ -276,7 +275,6 @@ async def find_similar_images(query_image: UploadFile = File(...)):
                 "distance": distances[index],
             })
         
-        # Calculate similarity percentages
         max_distance = max(result['distance'] for result in results)
         similarity_percentages = [
             100 * (1 - result['distance'] / max_distance) if max_distance > 0 else 100 
@@ -286,19 +284,22 @@ async def find_similar_images(query_image: UploadFile = File(...)):
         for i, result in enumerate(results):
             result['similarity_percentage'] = round(similarity_percentages[i], 2)
         
-        # Return top-N results
         top_n_results = results[:TOP_N_IMAGES]
         
-        return JSONResponse(content={"similar_images": top_n_results})
+        execution_time = time.perf_counter() - start_time
+        
+        return JSONResponse(content={"similar_images": top_n_results, "execution_time": execution_time})
     
     except HTTPException:
-        raise  # Re-raise HTTPExceptions for proper handling
+        raise  
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the query image: {str(e)}")
 
 
 @app.post("/music/")
 async def find_similar_midi(query_midi: UploadFile = File(...)):
+    start_time = time.perf_counter()
+
     try:
         if not (query_midi.filename.endswith(".mid") or query_midi.filename.endswith(".midi")):
             raise HTTPException(status_code=400, detail="Invalid file type. Only .mid or .midi files are allowed.")
@@ -323,7 +324,9 @@ async def find_similar_midi(query_midi: UploadFile = File(...)):
                 "similarity_percentage": similarity
             })
         
-        return JSONResponse(content={"similar_audio_files": results})
+        execution_time = time.perf_counter() - start_time
+
+        return JSONResponse(content={"similar_audio_files": results, "execution_time": execution_time})
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the query MIDI file: {str(e)}")
