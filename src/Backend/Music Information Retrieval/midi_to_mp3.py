@@ -18,26 +18,27 @@ def midi_to_mp3_fixed_paths(midi_file_path):
     temp_wav_path = os.path.join(output_directory, f"{filename_without_ext}.wav")
 
     try:
+        # Initialize FluidSynth and load the SoundFont
         fs = fluidsynth.Synth()
-        fs.start(driver="file", filename=temp_wav_path)
+        fs.start(driver="file", filename=temp_wav_path)  # Output to WAV file
         fs.sfload(soundfont_path)
-        fs.midi_file_play(midi_file_path)
+        fs.midi_file_play(midi_file_path)  # Play the MIDI file
         fs.delete()
 
-        sound = AudioSegment.from_wav(temp_wav_path)
+        # Convert WAV to MP3 using pydub
+        sound = AudioSegment.from_file(temp_wav_path, format="wav")
         sound.export(output_mp3_path, format="mp3")
 
         print(f"MP3 file created: {output_mp3_path}")
-        return output_mp3_path
 
     except Exception as e:
         print(f"Error converting MIDI to MP3: {e}")
-        return None
 
     finally:
-        # Clean up
+        # Clean up the temporary WAV file
         if os.path.exists(temp_wav_path):
             os.remove(temp_wav_path)
+
 
 def convert_all_mid_to_mp3(input_directory):
     # Walk through the directory
