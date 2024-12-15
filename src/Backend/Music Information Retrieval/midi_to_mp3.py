@@ -38,3 +38,12 @@ def midi_to_mp3_fixed_paths(midi_file_path):
         # Clean up
         if os.path.exists(temp_wav_path):
             os.remove(temp_wav_path)
+
+def convert_all_mid_to_mp3(input_directory):
+    # Walk through the directory
+    for root, _, files in os.walk(input_directory):
+        for file in files:
+            if file.endswith(".mid") or file.endswith(".midi"):
+                midi_file_path = os.path.join(root, file)
+                print(f"Processing: {midi_file_path}")
+                midi_to_mp3_fixed_paths(midi_file_path)
