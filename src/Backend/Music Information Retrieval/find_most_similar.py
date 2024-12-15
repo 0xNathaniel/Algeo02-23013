@@ -36,7 +36,7 @@ def find_most_similar(query_file, dataset_midis):
         atb_similarity = cosine_similarity_custom(query_atb, features_atb)
         rtb_similarity = cosine_similarity_custom(query_rtb, features_rtb)
         ftb_similarity = cosine_similarity_custom(query_ftb, features_ftb)
-        similarity = (atb_similarity * 5 + rtb_similarity * 47.5 + ftb_similarity * 47.5) / 100
+        similarity = (atb_similarity * 5 + rtb_similarity * 50 + ftb_similarity * 45) / 100
         similarity_percentage = f"{similarity * 100:.2f}%"
         similarities.append((filename, similarity_percentage))
 
