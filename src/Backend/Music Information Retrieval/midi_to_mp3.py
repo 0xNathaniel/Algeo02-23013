@@ -5,7 +5,7 @@ from pydub import AudioSegment
 def midi_to_mp3_fixed_paths(midi_file_path):
     # Hardcoded paths
     soundfont_path = "../../Frontend/public/Audio Sample/general_audio_sample.sf2"
-    output_directory = "../../Frontend/public/Convert Result"
+    output_directory = "../../Frontend/public/ConvertMP3"
 
     # Ensure output directory exists
     os.makedirs(output_directory, exist_ok=True)
@@ -40,7 +40,7 @@ def midi_to_mp3_fixed_paths(midi_file_path):
             os.remove(temp_wav_path)
 
 
-def convert_all_mid_to_mp3(input_directory):
+def convert_all_mid_to_mp3(input_directory="../../Frontend/public/Music Dataset"):
     # Walk through the directory
     for root, _, files in os.walk(input_directory):
         for file in files:
