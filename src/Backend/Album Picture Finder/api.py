@@ -44,11 +44,14 @@ async def find_similar_images(query_image: UploadFile = File(...)):
         results = []
         for rank, index in enumerate(top_n_indices):
             pic_name = image_files[index]
-            audio_file = mapper.get(pic_name, "Unknown")
+            mapper_entry = mapper.get(pic_name, {})
+            audio_file = mapper_entry.get("audio_file", "Unknown")
+            audio_name = mapper_entry.get("audio_name", "Unknown")
             results.append({
                 "rank": rank + 1,
                 "pic_name": pic_name,
                 "audio_file": audio_file,
+                "audio_name": audio_name,
                 "distance": distances[index],
             })
         
