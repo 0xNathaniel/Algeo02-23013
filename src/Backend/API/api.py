@@ -20,6 +20,7 @@ from mapper_album import load_mapper_album
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Music Information Retrieval/")))
 from find_most_similar import find_most_similar
 from mapper_music import load_mapper_music
+from midi_to_mp3 import convert_all_mid_to_mp3
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -118,7 +119,6 @@ def load_dataset_midis():
 load_dataset_midis()
 
 def extract_file(file_path: str, extraction_dir: str):
-    """Extract files from a zip, tar, rar, or 7z archive."""
     if file_path.endswith(".zip"):
         try:
             with zipfile.ZipFile(file_path, 'r') as zip_ref:
@@ -152,7 +152,6 @@ def extract_file(file_path: str, extraction_dir: str):
         raise ValueError("Unsupported file format. Supported formats are zip, tar, rar, and 7z.")
 
 def clear_directory(directory: str):
-    """Clear the specified directory before saving new files."""
     if os.path.exists(directory):
         for filename in os.listdir(directory):
             file_path = os.path.join(directory, filename)
@@ -164,14 +163,12 @@ def clear_directory(directory: str):
         os.makedirs(directory)
 
 def save_file(file: UploadFile, save_dir: str):
-    """Save a regular file (image or audio) to the specified directory."""
     file_path = os.path.join(save_dir, file.filename)
     with open(file_path, "wb") as temp_file:
         shutil.copyfileobj(file.file, temp_file)
     return file_path
 
 async def process_files(files: list[UploadFile], target_dir: str, supported_files: tuple):
-    """Process and save uploaded files to the target directory."""
     clear_directory(target_dir)
 
     processed_files = {
@@ -201,11 +198,6 @@ async def process_files(files: list[UploadFile], target_dir: str, supported_file
     return processed_files
 
 async def process_files(files: list[UploadFile], target_dir: str, supported_files: tuple):
-    """
-    Process and save uploaded files to the target directory.
-    Does not clear the directory on every call but checks file types and saves valid files.
-    """
-    # Ensure the target directory exists
     os.makedirs(target_dir, exist_ok=True)
 
     processed_files = {
@@ -228,38 +220,13 @@ async def process_files(files: list[UploadFile], target_dir: str, supported_file
                 extracted_files = extract_file(temp_file_path, target_dir)
                 processed_files["extracted_files"] += extracted_files
             except ValueError as e:
-                os.remove(temp_file_path)  # Clean up invalid archive
+                os.remove(temp_file_path)  
                 raise HTTPException(status_code=400, detail=str(e))
         else:
-            os.remove(temp_file_path)  # Remove unsupported file
+            os.remove(temp_file_path)  
             raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.filename}")
 
     return processed_files
-
-def midi_to_mp3_fixed_paths(midi_file_path):
-    filename_without_ext = os.path.splitext(os.path.basename(midi_file_path))[0]
-
-    output_mp3_path = os.path.join(OUTPUT_DIRECTORY, f"{filename_without_ext}.mp3")
-    temp_wav_path = os.path.join(OUTPUT_DIRECTORY, f"{filename_without_ext}.wav")
-
-    try:
-        fs = fluidsynth.Synth()
-        fs.start(driver="file", filename=temp_wav_path)
-        fs.sfload(SOUNDFONT_PATH)
-        fs.midi_file_play(midi_file_path)
-        fs.delete()
-
-        sound = AudioSegment.from_wav(temp_wav_path)
-        sound.export(output_mp3_path, format="mp3")
-
-        return output_mp3_path
-
-    except Exception as e:
-        raise Exception(f"Error converting {midi_file_path} to MP3: {e}")
-
-    finally:
-        if os.path.exists(temp_wav_path):
-            os.remove(temp_wav_path)
 
 
 # API Endpoints
@@ -361,22 +328,19 @@ async def upload_mapper_file(file: UploadFile = File(...)):
 
 @app.post("/upload-images/")
 async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
-    global image_files, principal_components, image_projections  # To update the global variables
+    global image_files, principal_components, image_projections  
 
     if not isinstance(files, list):
-        files = [files]  # Ensure `files` is a list
+        files = [files]  
 
     try:
-        # Process uploaded image files
         processed_files = await process_files(files, IMAGE_DIRECTORY, SUPPORTED_IMAGE_FILES)
 
-        # Re-process the database of images after uploading new files
-        if os.listdir(IMAGE_DIRECTORY):  # Ensure the directory is not empty
+        if os.listdir(IMAGE_DIRECTORY):  
             image_files, principal_components, image_projections = preprocess_database_images(
                 IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS
             )
         else:
-            # If no images exist, reset to default empty values
             image_files, principal_components, image_projections = [], None, None
             print(f"Warning: The image directory {IMAGE_DIRECTORY} is still empty after upload.")
 
@@ -392,7 +356,7 @@ async def upload_images(files: Union[list[UploadFile], UploadFile] = File(...)):
 @app.post("/upload-music/")
 async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
     if not isinstance(files, list):
-        files = [files]  # Ensure `files` is a list
+        files = [files] 
 
     try:
         # Process uploaded music files
@@ -406,31 +370,25 @@ async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the uploaded music files: {str(e)}")
 
-    
 @app.post("/convert-midi/")
-async def convert_midi_files(file_name: str = None):
+async def convert_all_midi_files():
     try:
         if not os.path.exists(MIDI_DIRECTORY):
             raise HTTPException(status_code=400, detail="MIDI directory does not exist.")
 
-        midi_files = [os.path.join(MIDI_DIRECTORY, f) for f in os.listdir(MIDI_DIRECTORY) if f.endswith((".mid", ".midi"))]
-
-        if file_name:
-            file_path = os.path.join(MIDI_DIRECTORY, file_name)
-            if not os.path.exists(file_path):
-                raise HTTPException(status_code=400, detail=f"File {file_name} not found in the MIDI directory.")
-            converted_file = midi_to_mp3_fixed_paths(file_path)
-            return JSONResponse(content={"message": f"Converted {file_name} to MP3.", "file": converted_file})
+        midi_files = [os.path.join(root, file)
+                      for root, _, files in os.walk(MIDI_DIRECTORY)
+                      for file in files if file.endswith((".mid", ".midi"))]
 
         if not midi_files:
             raise HTTPException(status_code=400, detail="No MIDI files found in the directory.")
 
-        converted_files = []
         for midi_file in midi_files:
-            converted_file = midi_to_mp3_fixed_paths(midi_file)
-            converted_files.append(converted_file)
+            print(f"Processing: {midi_file}")
+            midi_to_mp3_fixed_paths(midi_file)
 
-        return JSONResponse(content={"message": "All MIDI files converted to MP3.", "files": converted_files})
+        return JSONResponse(content={"message": "All MIDI files in the directory have been successfully converted to MP3."})
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during conversion: {e}")
+
