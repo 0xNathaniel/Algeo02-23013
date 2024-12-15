@@ -39,13 +39,13 @@ async def find_similar_midi(query_midi: UploadFile = File(...)):
         
         # Wrap the bytes in a BytesIO object
         query_midi_filelike = io.BytesIO(query_midi_bytes)
-        
-        # Load the BytesIO object into MidiFile
-        query_midi_obj = MidiFile(file=query_midi_filelike)
+
+        query_midi_obj = MidiFile(file = query_midi_filelike)
         
         # Call the modified find_most_similar function
         similarities = find_most_similar(query_midi_obj, dataset_midis)
         results = [{"rank": rank, "midi_name": midi_name, "similarity": similarity} for rank, midi_name, similarity in similarities]
+        
         return JSONResponse(content={"similar_audio_files": results})
     
     except Exception as e:
