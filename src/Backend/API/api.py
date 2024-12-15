@@ -39,7 +39,7 @@ AUDIO_DIR = "../../Frontend/public/Data/Music Dataset"
 SUPPORTED_IMAGE_FILES = (".png", ".jpg", ".jpeg")
 SUPPORTED_AUDIO_FILES = (".wav", ".mid", ".midi")
 SUPPORTED_ARCHIVES = (".zip", ".tar", ".rar", ".7z")
-MIDI_DIRECTORY = AUDIO_DIR
+MIDI_MP3_DIRECTORY = AUDIO_DIR
 MAPPER_FILE = "../../Frontend/public/Data/mapper.txt"
 RESIZE_DIM = 64
 N_COMPONENTS = 8
@@ -47,7 +47,7 @@ TOP_N_IMAGES = 30
 MAPPER_FILE_PATH = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../Frontend/public/Data/")), "mapper.txt")
 MIDI_DIRECTORY = "../../Frontend/public/Data/MIDI Files"
 SOUNDFONT_PATH = "../../Frontend/public/Audio Sample/general_audio_sample.sf2"
-OUTPUT_DIRECTORY = "../../Frontend/public/Convert Result"
+OUTPUT_DIRECTORY = "../../Frontend/public/ConvertMP3"
 
 dataset_midis = []
 album_mapper = load_mapper_album(MAPPER_FILE)
@@ -394,10 +394,9 @@ async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
 @app.post("/convert-midi/")
 async def convert_midi_files():
     try:
-        if not os.pathexists(MIDI_DIRECTORY):
+        if not os.path.exists(MIDI_MP3_DIRECTORY):
             raise HTTPException(status_code=400, detail="MIDI directory does not exist.")
-
-        convert_all_mid_to_mp3(MIDI_DIRECTORY)
+        convert_all_mid_to_mp3(MIDI_MP3_DIRECTORY)
 
         return JSONResponse(content={"message": "All MIDI files in the directory have been successfully converted to MP3."})
 
