@@ -2,8 +2,8 @@ import os
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from PIL import Image
-from cache import preprocess_database_images
 from retrieval_and_output import preprocess_query_image, output_similarity
+from cache import preprocess_database_images
 from mapper import load_mapper
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,11 +18,11 @@ app.add_middleware(
 )
 
 # Parameters
+RESIZE_DIM = 64  # Number of pixels (for image resizing)
 IMAGE_DIRECTORY = "../../Frontend/public/Data/Dataset"
 MAPPER_FILE = "../../Frontend/public/Data/mapper.txt"
-RESIZE_DIM = 512  # Number of pixels (for image resizing)
 N_COMPONENTS = 8  # Number of principal components
-TOP_N_IMAGES = 6  # Number of top similar images to return
+TOP_N_IMAGES = 30  # Number of top similar images to return
 
 # Check if the IMAGE_DIRECTORY exists
 if not os.path.exists(IMAGE_DIRECTORY):
@@ -36,27 +36,30 @@ if not os.path.exists(MAPPER_FILE):
 mapper = load_mapper(MAPPER_FILE)
 
 # Preload and preprocess database images
-image_files, mean, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
+image_files, principal_components, image_projections = preprocess_database_images(IMAGE_DIRECTORY, RESIZE_DIM, N_COMPONENTS)
 
 # API endpoint
-@app.post("/finder/")
+@app.post("/image/")
 async def find_similar_images(query_image: UploadFile = File(...)):
     try:
         if not query_image.filename.lower().endswith(('png', 'jpg', 'jpeg')):
             raise HTTPException(status_code=400, detail="Invalid image format. Supported formats are: PNG, JPG, JPEG.")
         
         query_image = Image.open(query_image.file)
-        query_projection = preprocess_query_image(mean, query_image, RESIZE_DIM, principal_components)
+        query_projection = preprocess_query_image(query_image, RESIZE_DIM, principal_components)
         distances, _, top_n_indices = output_similarity(query_projection, image_projections, len(image_files))
 
         results = []
         for rank, index in enumerate(top_n_indices):
             pic_name = image_files[index]
-            audio_file = mapper.get(pic_name, "Unknown")
+            mapper_entry = mapper.get(pic_name, {})
+            audio_file = mapper_entry.get("audio_file", "Unknown")
+            audio_name = mapper_entry.get("audio_name", "Unknown")
             results.append({
                 "rank": rank + 1,
                 "pic_name": pic_name,
                 "audio_file": audio_file,
+                "audio_name": audio_name,
                 "distance": distances[index],
             })
         

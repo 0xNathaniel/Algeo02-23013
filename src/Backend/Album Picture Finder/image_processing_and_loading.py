@@ -3,6 +3,8 @@ import numpy as np
 from PIL import Image
 
 def load_and_process_images(image_directory, resize_dim):
+    print("Loading and processing images...")    
+    
     image_files = [f for f in os.listdir(image_directory) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
     images = []
     

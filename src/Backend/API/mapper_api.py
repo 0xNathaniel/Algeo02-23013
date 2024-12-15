@@ -9,20 +9,25 @@ app = FastAPI()
 
 def validate_mapper_format(file_content: str):
     lines = file_content.strip().split("\n")
-    
-    if lines[0].strip() != "audio_file pic_name":
-        raise ValueError("Invalid file format. The first line must be 'audio_file pic_name'.")
-    
+
+    first_line = lines[0].strip()
+    if first_line != "audio_file audio_name pic_name":
+        raise ValueError(f"Invalid file format. The first line must be 'audio_file audio_name pic_name', but got: '{first_line}'.")
+
     for line in lines[1:]:
         columns = line.strip().split()
-        if len(columns) != 2:
-            raise ValueError(f"Invalid format in line: '{line}'. Each line must contain exactly two columns.")
-        
-        audio_file, pic_name = columns
+        if len(columns) != 3:
+            raise ValueError(f"Invalid format in line: '{line}'. Each line must contain exactly three columns: 'audio_file audio_name pic_name'.")
+
+        audio_file, audio_name, pic_name = columns
         if not audio_file.endswith(".mid") or not (pic_name.endswith(".png") or pic_name.endswith(".jpg")):
             raise ValueError(f"Invalid file format in line: '{line}'. Audio file must end with '.mid' and image file must end with '.png' or '.jpg'.")
-    
+        
+        if not audio_name.isalnum():
+            raise ValueError(f"Invalid audio name in line: '{line}'. Audio name must be alphanumeric.")
+
     return lines
+
 
 @app.post("/upload-mapper/")
 async def upload_mapper_file(file: UploadFile = File(...)):

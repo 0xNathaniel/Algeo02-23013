@@ -10,15 +10,15 @@ image_directory = "src/Data/Dataset"
 query_image_name = "pic1.png"  # Change to your query image name
 n_components = 8  # Number of principal components
 n_images = 6  # Number of top similar images to return
-resize_dim = 512  # Resize dimension (images will be resized to resize_dim x resize_dim)
+resize_dim = 64  # Resize dimension (images will be resized to resize_dim x resize_dim)
 top_n_images = 6 # # Number of top similar images to return
 
 def main():
     # Load and process database images
-    image_files, mean, principal_components, image_projections = preprocess_database_images(image_directory, resize_dim, n_components)
+    image_files, principal_components, image_projections = preprocess_database_images(image_directory, resize_dim, n_components)
     # Load and process the query image
     query_image = Image.open(os.path.join(image_directory, query_image_name)).convert('L')
-    query_projection = preprocess_query_image(mean, query_image, resize_dim, principal_components)
+    query_projection = preprocess_query_image(query_image, resize_dim, principal_components)
     # Calculate similarity (Euclidean distance)
     distances, _, top_n_indices = output_similarity(query_projection, image_projections, top_n_images)
     
