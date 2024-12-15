@@ -4,6 +4,8 @@ MAPPER_FILE = "src/Backend/Album Picture Finder/mapper.txt"
 
 # Load mapper file into a dictionary
 def load_mapper(mapper_file):
+    print("Loading mapper...")
+    
     mapper = {}
     try:
         with open(mapper_file, "r") as file:
