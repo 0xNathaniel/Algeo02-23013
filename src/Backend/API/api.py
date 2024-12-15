@@ -106,9 +106,9 @@ def validate_mapper_format(file_content: str):
 def load_dataset_midis():
     global dataset_midis
     dataset_midis = []
-    for filename in os.listdir(MIDI_DIRECTORY):
+    for filename in os.listdir(AUDIO_DIR):
         if filename.endswith(".mid") or filename.endswith(".midi"):
-            file_path = os.path.join(MIDI_DIRECTORY, filename)
+            file_path = os.path.join(AUDIO_DIR, filename)
             try:
                 midi_obj = MidiFile(file_path)
                 dataset_midis.append((filename, midi_obj))
