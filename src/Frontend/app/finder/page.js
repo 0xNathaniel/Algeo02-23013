@@ -12,16 +12,16 @@ const ITEMS_PER_PAGE = 8;
 
 const page = () => {
   const [currentPage, setCurrentPage] = useState(0);
-  const [albumResponse, setAlbumResponse] = useState([]); // Album results (image similarity)
-  const [midiResponse, setMidiResponse] = useState([]); // Music results (MIDI similarity)
-  const [currentView, setCurrentView] = useState("album"); // Default view: album
-  const [file, setFile] = useState(null); // File to be uploaded
+  const [albumResponse, setAlbumResponse] = useState([]); 
+  const [midiResponse, setMidiResponse] = useState([]); 
+  const [currentView, setCurrentView] = useState("album"); 
+  const [file, setFile] = useState(null); 
   const [imageFile, setImageFile] = useState(null); 
   const [audioFile, setAudioFile] = useState(null); 
-  const [mapperFile, setMapperFile] = useState(null); // Mapper file to be uploaded
+  const [mapperFile, setMapperFile] = useState(null); 
   const [message, setMessage] = useState(null);
-  const [executionTime, setExecutionTime] = useState(null); // Execution time for current API response
-  const [imagePreview, setImagePreview] = useState(null); // Preview image for FinderCard
+  const [executionTime, setExecutionTime] = useState(null); 
+  const [imagePreview, setImagePreview] = useState(null); 
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
   const [uploadMessage, setUploadMessage] = useState(null);
@@ -36,13 +36,10 @@ const page = () => {
     if (selectedFile) {
       const fileExtension = selectedFile.name.split(".").pop().toLowerCase();
       if (["jpg", "jpeg", "png"].includes(fileExtension)) {
-        // If it's an image, set the file preview to its URL
         setImagePreview(URL.createObjectURL(selectedFile));
       } else if (["mid", "midi"].includes(fileExtension)) {
-        // If it's an audio file, use the dummy image
         setImagePreview(Dummy);
       } else {
-        // Clear the preview for unsupported file types
         setImagePreview(null);
       }
     } else {
@@ -50,14 +47,12 @@ const page = () => {
     }
   };
 
-  // Handle Pagination: Previous Page
   const handlePrevious = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
   };
 
-  // Handle Pagination: Next Page
   const handleNext = () => {
     const totalItems =
       currentView === "album" ? albumResponse.length : midiResponse.length;
@@ -66,7 +61,6 @@ const page = () => {
     }
   };
 
-  // Paginated data for current view
   const paginatedData =
     currentView === "album"
       ? albumResponse.slice(
@@ -78,7 +72,6 @@ const page = () => {
           (currentPage + 1) * ITEMS_PER_PAGE
         );
 
-  // Handle Single File Upload (Image or MIDI)
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) {
@@ -91,7 +84,6 @@ const page = () => {
 
     try {
       if (["jpg", "jpeg", "png"].includes(fileExtension)) {
-        // API for images
         formData.append("query_image", file);
 
         const response = await axios.post("http://localhost:8000/image/", formData, {
@@ -103,7 +95,6 @@ const page = () => {
         setExecutionTime(response.data.execution_time);
         setMessage("Image file processed successfully!");
       } else if (["mid", "midi"].includes(fileExtension)) {
-        // API for MIDI files
         formData.append("query_midi", file);
 
         const response = await axios.post("http://localhost:8000/music/", formData, {
@@ -111,7 +102,7 @@ const page = () => {
         });
 
         const result = response.data.similar_audio_files;
-        setAudioPath(response.data.file_url); // Store uploaded MIDI file's URL
+        setAudioPath(response.data.file_url); 
         setMidiResponse(result);
         setExecutionTime(response.data.execution_time);
         setMessage("MIDI file processed successfully!");
@@ -125,7 +116,6 @@ const page = () => {
     }
   };
 
-  // Handle ZIP File Upload (Picture/Audio)
   const handleImageUpload = async () => {
     if (!imageFile) {
       setMessage("Please select an image file.");
@@ -133,7 +123,7 @@ const page = () => {
     }
   
     const formData = new FormData();
-    formData.append("files", imageFile); // Ensure the backend expects "files"
+    formData.append("files", imageFile); 
   
     try {
       const response = await axios.post("http://localhost:8000/upload-images/", formData, {
@@ -175,8 +165,6 @@ const page = () => {
     }
   };
   
-  
-  // Handle Mapper File Upload
   const handleMapperUpload = async () => {
     if (!mapperFile) {
       setMessage("Please select a mapper file.");
@@ -194,19 +182,6 @@ const page = () => {
       setMessage("Mapper file uploaded successfully!");
     } catch (error) {
       setMessage("An error occurred while uploading the mapper file.");
-    }
-  };
-
-
-  const playAudio = () => {
-    if (audio) {
-      audio.play();
-    }
-  };
-
-  const pauseAudio = () => {
-    if (audio) {
-      audio.pause();
     }
   };
 
@@ -258,9 +233,6 @@ const page = () => {
     }
   };
   
-
-
-  // const handleFileChange = (event) => setFile(event.target.files[0]);
   const handleImageFileChange = (event) => setImageFile(event.target.files[0]);
   const handleAudioFileChange = (event) => setAudioFile(event.target.files[0]);
   const handleMapperFileChange = (event) => setMapperFile(event.target.files[0]);
@@ -272,16 +244,10 @@ const page = () => {
       <div className=" bg-white mx-[50px] sm:mx-[50px] md:mx-[50px] lg:mx-[100px] text-[#1E2567] h-full shadow-lg mb-10 rounded-xl p-10 flex flex-col justify-center items-center">
         <h1 className="text-4xl font-lora-bold mb-6">Upload Here!</h1>
         <FinderCard
-          image={imagePreview} // Display the preview image or dummy image
+          image={imagePreview}
           name={file?.name || "No file selected"}
           audio = {audioPath ? audioPath : ""}
         />
-
-
-        {/* <div>
-          <button onClick={playAudio}>Play Audio</button>
-          <button onClick={pauseAudio}>Pause Audio</button>
-        </div> */}
 
         <div className="p-4 flex flex-col items-center justify-center hover:scale-110 transition-transform duration-400 ease-in-out">
           <button

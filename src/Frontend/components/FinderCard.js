@@ -12,11 +12,10 @@ import { Midi } from "@tonejs/midi";
 import * as Tone from "tone";
 
 export default function FinderCard({ image, name, percentage, audio }) {
-  const [scheduleId, setScheduleId] = useState(null); // Schedule ID to stop playback
   const audioPath = `/Data/Music Dataset/${audio}`;
-  const [isPlaying, setIsPlaying] = useState(false); // Tracks whether the MIDI is playing
-  const [isPaused, setIsPaused] = useState(false); // Tracks whether playback is paused
-  const [synth, setSynth] = useState(null); // Stores the synth instance
+  const [isPlaying, setIsPlaying] = useState(false); 
+  const [isPaused, setIsPaused] = useState(false); 
+  const [synth, setSynth] = useState(null);
 
   const playMidi = async () => {
     if (isPlaying && !isPaused) {
@@ -25,7 +24,6 @@ export default function FinderCard({ image, name, percentage, audio }) {
     }
 
     if (isPaused) {
-      // Resume playback
       Tone.Transport.start();
       setIsPlaying(true);
       setIsPaused(false);
@@ -34,21 +32,17 @@ export default function FinderCard({ image, name, percentage, audio }) {
     }
 
     try {
-      // Fetch and parse the MIDI file
       const response = await fetch(audioPath);
       const arrayBuffer = await response.arrayBuffer();
       const midi = new Midi(arrayBuffer);
 
       console.log("Parsed MIDI:", midi);
 
-      // Create a synth if it doesn't already exist
       const newSynth = synth || new Tone.PolySynth(Tone.Synth).toDestination();
       setSynth(newSynth);
 
-      // Clear any previously scheduled events
       Tone.Transport.cancel();
 
-      // Schedule notes for playback
       midi.tracks.forEach((track) => {
         track.notes.forEach((note) => {
           Tone.Transport.schedule((time) => {
@@ -112,10 +106,9 @@ export default function FinderCard({ image, name, percentage, audio }) {
   {/* Audio name */}
   <div>{audio ? audio : ""}</div>
 
-  {/* Playback controls */}
+  {/* Audio controls */}
   {audio && (
   <div className="flex items-center space-x-2">
-    {/* Show Play Button when not playing */}
     {!isPlaying && (
       <button>
         <Image
@@ -129,7 +122,6 @@ export default function FinderCard({ image, name, percentage, audio }) {
       </button>
     )}
 
-    {/* Show Pause and Stop Buttons when playing */}
     {isPlaying && (
       <div className="flex space-x-2">
         <button onClick={pauseMidi}>
