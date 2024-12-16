@@ -1,5 +1,8 @@
 import numpy as np
 
+def create_covariance_matrix(standardized_images):
+    return np.cov(standardized_images)
+
 def perform_svd(images):
     print("Performing SVD...")
     

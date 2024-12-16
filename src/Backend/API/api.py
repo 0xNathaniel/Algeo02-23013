@@ -12,7 +12,6 @@ from fastapi.responses import JSONResponse
 from typing import Union
 from PIL import Image
 from mido import MidiFile
-from pydub import AudioSegment
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Album Picture Finder/")))
 from retrieval_and_output import preprocess_query_image, output_similarity
 from cache import preprocess_database_images
@@ -20,7 +19,6 @@ from mapper_album import load_mapper_album
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../Music Information Retrieval/")))
 from find_most_similar import find_most_similar
 from mapper_music import load_mapper_music
-from midi_to_mp3 import convert_all_mid_to_mp3
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -46,7 +44,6 @@ RESIZE_DIM = 64
 N_COMPONENTS = 8
 TOP_N_IMAGES = 30
 MAPPER_FILE_PATH = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../Frontend/public/Data/")), "mapper.txt")
-MIDI_DIRECTORY = "../../Frontend/public/Data/MIDI Files"
 SOUNDFONT_PATH = "../../Frontend/public/Audio Sample/general_audio_sample.sf2"
 OUTPUT_DIRECTORY = "../../Frontend/public/ConvertMP3"
 
@@ -385,6 +382,7 @@ async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
     try:
         # Process uploaded music files
         processed_files = await process_files(files, AUDIO_DIR, SUPPORTED_AUDIO_FILES)
+        load_dataset_midis()
         return JSONResponse(content={
             "message": "Music files successfully uploaded and processed.",
             "processed_files": processed_files
@@ -393,15 +391,3 @@ async def upload_music(files: Union[list[UploadFile], UploadFile] = File(...)):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the uploaded music files: {str(e)}")
-
-@app.post("/convert-midi/")
-async def convert_midi_files():
-    try:
-        if not os.path.exists(MIDI_MP3_DIRECTORY):
-            raise HTTPException(status_code=400, detail="MIDI directory does not exist.")
-        convert_all_mid_to_mp3(MIDI_MP3_DIRECTORY)
-
-        return JSONResponse(content={"message": "All MIDI files in the directory have been successfully converted to MP3."})
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error during conversion: {e}")
