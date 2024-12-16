@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 export default function HomeCard({ data }) {
   return (
-    <div className={`bg-[${data.bg}] sm:min-w-[550px] md:min-w-[750px] h-full mx-[50px] my-[50px] rounded-2xl py-[50px] px-10 md:px-20 shadow-lg flex flex-col md:flex-row items-center max-w-[1200px] justify-center"`}>
+    <div className={`bg-[${data.bg}] hover:scale-110 transition-transform duration-400 ease-in-out sm:min-w-[550px] md:min-w-[750px] h-full mx-[50px] my-[50px] rounded-2xl py-[50px] px-10 md:px-20 shadow-lg flex flex-col md:flex-row items-center max-w-[1200px] justify-center drop-shadow-xl"`}>
       <div className="flex-shrink-0 max-w-[350px]  h-[250px] overflow-hidden rounded-2xl">
         <Image
           src={data.img}

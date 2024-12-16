@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import FinderCard from "@/components/FinderCard";
 import Left from "@/public/panahkiri.png";
@@ -8,7 +8,7 @@ import Right from "@/public/panahkanan.png";
 import axios from "axios";
 import Dummy from "@/public/dummy.png"
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 8;
 
 const page = () => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -22,6 +22,12 @@ const page = () => {
   const [message, setMessage] = useState(null);
   const [executionTime, setExecutionTime] = useState(null); // Execution time for current API response
   const [imagePreview, setImagePreview] = useState(null); // Preview image for FinderCard
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState(null);
+  const [uploadMessage, setUploadMessage] = useState(null);
+  const [audioPath, setAudioPath] = useState(null);
+
+
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -105,6 +111,7 @@ const page = () => {
         });
 
         const result = response.data.similar_audio_files;
+        setAudioPath(response.data.file_url); // Store uploaded MIDI file's URL
         setMidiResponse(result);
         setExecutionTime(response.data.execution_time);
         setMessage("MIDI file processed successfully!");
@@ -151,7 +158,7 @@ const page = () => {
     }
   
     const formData = new FormData();
-    formData.append("files", audioFile); // Ensure the backend expects "files"
+    formData.append("files", audioFile); 
   
     try {
       const response = await axios.post("http://localhost:8000/upload-music/", formData, {
@@ -190,11 +197,6 @@ const page = () => {
     }
   };
 
-  const audioPath = "/Data/Dataset/audio_4.midi";
-
-  // const [audio] = useState(
-  //   typeof Audio !== "undefined" ? new Audio("/Data/Dataset/audio1.mp3") : null
-  // );
 
   const playAudio = () => {
     if (audio) {
@@ -207,6 +209,56 @@ const page = () => {
       audio.pause();
     }
   };
+
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
+
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunksRef.current.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      setAudioURL(audioUrl);
+      audioChunksRef.current = [];
+
+      uploadAudio(audioBlob);
+    };
+
+    mediaRecorder.start();
+    mediaRecorderRef.current = mediaRecorder;
+    setIsRecording(true);
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const uploadAudio = async (audioBlob) => {
+    const formData = new FormData();
+    formData.append("file", audioBlob, "recording.webm");
+  
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setUploadMessage(response.data.message);
+    } catch (error) {
+      setUploadMessage("Upload failed. Please try again.");
+      console.error(error);
+    }
+  };
+  
+
 
   // const handleFileChange = (event) => setFile(event.target.files[0]);
   const handleImageFileChange = (event) => setImageFile(event.target.files[0]);
@@ -222,15 +274,38 @@ const page = () => {
         <FinderCard
           image={imagePreview} // Display the preview image or dummy image
           name={file?.name || "No file selected"}
+          audio = {audioPath ? audioPath : ""}
         />
+
 
         {/* <div>
           <button onClick={playAudio}>Play Audio</button>
           <button onClick={pauseAudio}>Pause Audio</button>
         </div> */}
 
+        <div className="p-4 flex flex-col items-center justify-center hover:scale-110 transition-transform duration-400 ease-in-out">
+          <button
+            onClick={isRecording ? stopRecording : startRecording}
+            className={`px-4 py-2  rounded-lg shadow-md ${
+              isRecording ? "bg-[#D1D3E3] text-[#1E2567]" : "bg-[#1E2567] text-white"
+            }`}
+          >
+            {isRecording ? "Stop Recording" : "Start Recording"}
+          </button>
+
+          {audioURL && (
+              <div className="mt-4">
+                <div className="font-semibold">Recorded Audio:</div>
+                <audio controls src={audioURL}></audio>
+              </div>
+            )}
+            {uploadMessage && <p className="mt-4">{uploadMessage}</p>}
+        </div>
+
+        <div>or</div>
+
         {/* Upload Form */}
-        <form onSubmit={handleUpload} className="flex items-center gap-2 mt-6 mb-2">
+        <form onSubmit={handleUpload} className="flex items-center gap-2 mb-2 hover:scale-110 transition-transform duration-400 ease-in-out">
           <input
             type="file"
             onChange={handleFileChange}
@@ -243,6 +318,7 @@ const page = () => {
             Upload
           </button>
         </form>
+
         <div className="flex flex-wrap md:flex-row lg:flex-nowrap space-x-6 items-center justify-center">
           {/* Pictures Dataset Form */}
           <form
@@ -250,7 +326,7 @@ const page = () => {
               e.preventDefault();
               handleImageUpload("Picture");
             }}
-            className="flex space-x-4 items-center"
+            className="flex space-x-4 items-center hover:scale-110 transition-transform duration-400 ease-in-out"
           >
             <input
               type="file"
@@ -267,13 +343,14 @@ const page = () => {
               Pictures
             </button>
           </form>
+          
           {/* Audios Dataset Form */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleAudioUpload("Audio");
             }}
-            className="flex space-x-4 items-center"
+            className="flex space-x-4 items-center hover:scale-110 transition-transform duration-400 ease-in-out"
           >
             <input
               type="file"
@@ -297,7 +374,7 @@ const page = () => {
               e.preventDefault();
               handleMapperUpload();
             }}
-            className="flex space-x-4 items-center"
+            className="flex space-x-4 items-center hover:scale-110 transition-transform duration-400 ease-in-out"
           >
             <input
               type="file"
@@ -323,10 +400,10 @@ const page = () => {
       </div>
 
       {/* Results Section */}
-      <div className="py-10  text-white flex flex-col items-center justify-center">
-        <div className="text-2xl flex space-x-2">
+      <div className="py-10  text-white flex flex-col space-y-4 items-center justify-center">
+        <div className="text-2xl flex space-x-4">
           <button
-            className={`py-2 px-5 rounded-lg ${
+            className={`py-2 px-5 rounded-lg hover:scale-110 transition-transform duration-400 ease-in-out ${
               currentView === "album" ? "bg-[#1E2567]" : "bg-[#646A9F]"
             }`}
             onClick={() => setCurrentView("album")}
@@ -334,7 +411,7 @@ const page = () => {
             Album
           </button>
           <button
-            className={`py-2 px-5 rounded-lg ${
+            className={`py-2 px-5 rounded-lg hover:scale-110 transition-transform duration-400 ease-in-out ${
               currentView === "music" ? "bg-[#1E2567]" : "bg-[#646A9F]"
             }`}
             onClick={() => setCurrentView("music")}

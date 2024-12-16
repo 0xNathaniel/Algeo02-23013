@@ -20,7 +20,7 @@ const Navbar = () => {
             </div>
             <div className='flex space-x-2'>
               <Link href='/' className='mx-2'>
-              <button className={`flex text-white w-full rounded-md px-5 py-2 bg-[#9CA0C7] hover:bg-[#8C90BC] items-center justify-center ${pathname ==='/' ? 'bg-[#646A9F]' : 'bg-[#9CA0C7]'}`}>
+              <button className={`hover:scale-105 transition-transform duration-300 ease-in-out flex text-white w-full rounded-md px-5 py-2 bg-[#9CA0C7] hover:bg-[#8C90BC] items-center justify-center ${pathname ==='/' ? 'bg-[#646A9F]' : 'bg-[#9CA0C7]'}`}>
                 <Image
                 src = {Home}
                 width={30}
@@ -31,7 +31,7 @@ const Navbar = () => {
               </Link>
 
               <Link href='/finder' className='mx-2'>
-              <button className={`flex text-white w-full rounded-md  px-5 py-2 bg-[#9CA0C7] hover:bg-[#8C90BC] items-center justify-center ${pathname ==='/' ? 'bg-[#9CA0C7]' : 'bg-[#646A9F]'}`}>
+              <button className={`hover:scale-105 transition-transform duration-300 ease-in-out flex text-white w-full rounded-md  px-5 py-2 bg-[#9CA0C7] hover:bg-[#8C90BC] items-center justify-center ${pathname ==='/' ? 'bg-[#9CA0C7]' : 'bg-[#646A9F]'}`}>
                 <Image
                 src = {Search}
                 width={30}
