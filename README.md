@@ -1,11 +1,12 @@
 # Algeo02-23013
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)
 ![OS](https://img.shields.io/badge/os-windows%20%7C%20apple%20%7C%20linux-lightgrey?logo=linux&logoColor=white)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)
 ![npm](https://img.shields.io/badge/npm-10.8.2-red?logo=npm&logoColor=white)
+![tailwind.css](https://img.shields.io/badge/tailwind.css-latest-blueviolet?logo=tailwindcss&logoColor=white)
 ![axios](https://img.shields.io/badge/axios-1.7.9-purple?logo=javascript&logoColor=white)
+![tone](https://img.shields.io/badge/tone-15.0.4-lightgrey?logo=javascript&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/fastapi-0.115.6-green?logo=fastapi&logoColor=white)
-![fluidsynth](https://img.shields.io/badge/fluidsynth-0.2-darkcyan?logo=audio&logoColor=white)
 ![matplotlib](https://img.shields.io/badge/matplotlib-3.9.2-orange?logo=python&logoColor=white)
 ![mido](https://img.shields.io/badge/mido-1.3.3-yellow?logo=midi&logoColor=white)
 ![numpy](https://img.shields.io/badge/numpy-2.0.2-blue?logo=numpy&logoColor=white)
@@ -13,9 +14,8 @@
 ![uvicorn](https://img.shields.io/badge/uvicorn-0.32.1-black?logo=fastapi&logoColor=white)
 ![Pillow](https://img.shields.io/badge/pillow-11.0.0-pink?logo=python&logoColor=white)
 ![py7zr](https://img.shields.io/badge/py7zr-0.22.0-darkgreen?logo=archive&logoColor=white)
-![pydub](https://img.shields.io/badge/pydub-0.25.1-lightblue?logo=audio&logoColor=white)
 ![rarfile](https://img.shields.io/badge/rarfile-4.2-darkblue?logo=file-archive&logoColor=white)
-![tailwind.css](https://img.shields.io/badge/tailwind.css-latest-blueviolet?logo=tailwindcss&logoColor=white)
+
 
 
 ![Broken Home Logo](img/BrokenHomeLogoDark.png)
@@ -39,9 +39,11 @@ Aplikasi ini mendukung berbagai format file gambar, audio, dan arsip seperti `.p
    ```bash
    git clone https://github.com/username/repository-name.git
    cd repository-name
-2. **Download dependencies dengan menggunakan pip**:
+2. **Download dependencies dengan menggunakan pip dan npm**:
    ```bash
-   pip install -r requirements.txt
+   pip install -r pyrequirements.txt
+   npm install axios
+   npm install tone
 3. **Jalankan aplikasi FastAPI pada suatu terminal**:
    ```bash
    uvicorn main:app --reload
