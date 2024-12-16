@@ -45,5 +45,6 @@ def find_most_similar(query_file, dataset_midis):
         
     similarities = sorted(similarities, key=lambda x: float(x[1].rstrip('%')), reverse=True)
     ranked_similarities = [(rank + 1, filename, similarity) for rank, (filename, similarity) in enumerate(similarities)]
+    ranked_similarities_capped = ranked_similarities[:40]
     
-    return ranked_similarities
+    return ranked_similarities_capped
