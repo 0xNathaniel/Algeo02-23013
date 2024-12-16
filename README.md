@@ -46,9 +46,14 @@ Aplikasi ini mendukung berbagai format file gambar, audio, dan arsip seperti `.p
    npm install tone
 3. **Jalankan aplikasi FastAPI pada suatu terminal**:
    ```bash
+   cd src
+   cd Backend
+   cd API
    uvicorn main:app --reload
 4. **Jalankan Front End pada terminal lainnya**:
    ```bash
+   cd src
+   cd Frontend
    npm run dev
 5. **Jalankan aplikasi**:
    ```bash
