@@ -41,7 +41,7 @@ SUPPORTED_ARCHIVES = (".zip", ".tar", ".rar", ".7z")
 MIDI_MP3_DIRECTORY = AUDIO_DIR
 MAPPER_FILE = "../../Frontend/public/Data/mapper.txt"
 RESIZE_DIM = 64
-N_COMPONENTS = 8
+N_COMPONENTS = 64
 TOP_N_IMAGES = 30
 MAPPER_FILE_PATH = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../Frontend/public/Data/")), "mapper.txt")
 SOUNDFONT_PATH = "../../Frontend/public/Audio Sample/general_audio_sample.sf2"
@@ -195,7 +195,7 @@ async def process_files(files: list[UploadFile], target_dir: str, supported_file
     return processed_files
 
 async def process_files(files: list[UploadFile], target_dir: str, supported_files: tuple):
-    os.makedirs(target_dir, exist_ok=True)
+    clear_directory(target_dir)  # Clear the target directory
 
     processed_files = {
         "files": [],
@@ -205,23 +205,21 @@ async def process_files(files: list[UploadFile], target_dir: str, supported_file
     for file in files:
         temp_file_path = os.path.join(target_dir, file.filename)
 
-        # Save the uploaded file temporarily
         with open(temp_file_path, "wb") as temp_file:
             shutil.copyfileobj(file.file, temp_file)
 
-        # Check the file type
-        if file.filename.endswith(supported_files):
-            processed_files["files"].append(temp_file_path)
-        elif file.filename.endswith(SUPPORTED_ARCHIVES):
-            try:
+        try:
+            if file.filename.endswith(supported_files):
+                saved_file_path = save_file(file, target_dir)
+                processed_files["files"].append(saved_file_path)
+            elif file.filename.endswith(SUPPORTED_ARCHIVES):
                 extracted_files = extract_file(temp_file_path, target_dir)
                 processed_files["extracted_files"] += extracted_files
-            except ValueError as e:
-                os.remove(temp_file_path)  
-                raise HTTPException(status_code=400, detail=str(e))
-        else:
-            os.remove(temp_file_path)  
-            raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.filename}")
+            else:
+                raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.filename}")
+        finally:
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
 
     return processed_files
 
