@@ -420,7 +420,7 @@ const page = () => {
         {/* Pagination Controls */}
         <div className="flex text-[#1E2567]">
           <button className="m-3" onClick={handlePrevious} disabled={currentPage === 0}>
-            <Image src={Left} width={20} alt="arrow" />
+            <Image src={Left} width={20} alt="arrow"  className="hover:scale-110 transition-transform duration-400 ease-in-out"/>
           </button>
           <div className="m-3 text-xl">
             {currentPage + 1} of{" "}
@@ -436,7 +436,7 @@ const page = () => {
               (currentView === "album" ? albumResponse.length : midiResponse.length)
             }
           >
-            <Image src={Right} width={20} alt="arrow" />
+            <Image src={Right} width={20} alt="arrow" className="hover:scale-110 transition-transform duration-400 ease-in-out" />
           </button>
         </div>
 
