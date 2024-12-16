@@ -57,6 +57,6 @@ Aplikasi ini mendukung berbagai format file gambar, audio, dan arsip seperti `.p
 
 | Fitur       | Nama Penanggung Jawab | NIM Penanggung Jawab |
 |-------------|-------------------------------|---------------------|
-| Album Picture Finder   | Nathaniel Jonathan Rusli  | 13523013 |
+| Album Picture Finder & API   | Nathaniel Jonathan Rusli  | 13523013 |
 | Music Information Retrieval | Maheswara Bayu Kaindra  | 13523015|
 | BrokenHome Website| Jessica Allen | 13523059 |
