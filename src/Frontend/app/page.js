@@ -9,23 +9,26 @@ const Dummy = [
   {
     name: "Nathaniel Jonathan Rusli",
     nim: "13523013",
-    pesan: "''Aku telah menghabiskan waktu dua jam akibat bug one line of code.''",
+    pesan: "''Saya telah menghabiskan waktu dua jam akibat bug one line of code.''",
     img: "/fotonathan.jpg",
-    bg: "#1E2567"
+    bg: "#1E2567",
+    link: "https://www.linkedin.com/in/nathanieljr/"
   },
   {
     name: "Maheswara Bayu Kaindra",
     nim: "13523015",
-    pesan: "''Gua mah chill aja.''",
-    img: "/chillguy.png",
-    bg: "#646A9F"
+    pesan: "''Kukira kusepuh ternyata kurapuh, tapi gua ganteng jadi chill aja.''",
+    img: "/fotoindra.jpeg",
+    bg: "#646A9F",
+    link:"https://www.linkedin.com/in/maheswarakaindra/"
   },
   {
     name: "Jessica Allen",
     nim: "13523059",
     pesan: "''First time full anggota kerja, gada yang ngilang.''",
     img: "/fotoallen.jpg",
-    bg: "#9CA0C7"
+    bg: "#9CA0C7",
+    link:"https://www.linkedin.com/in/jessica-allen-lim/"
   }
 ]
 

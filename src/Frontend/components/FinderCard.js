@@ -73,7 +73,7 @@ export default function FinderCard({ image, name, percentage, audio }) {
       return;
     }
 
-    Tone.Transport.pause(); // Pause the transport
+    Tone.Transport.pause(); 
     setIsPlaying(false);
     setIsPaused(true);
     console.log("Playback paused.");
