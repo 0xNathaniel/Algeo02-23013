@@ -448,7 +448,7 @@ const page = () => {
         ) : (
           <div className="flex space-x-10 text-[#1E2567]">
             <div>Total Output: {midiResponse.length}</div>
-            <div>Processing Time: {executionTime ? executionTime.toFixed(2) : "-"} seconds</div>
+            <div>Processing Time: {executionTime ? executionTime.toFixed(2) : "-"} s</div>
           </div>
         )}
       </div>
