@@ -93,7 +93,7 @@ def validate_mapper_format(file_content: str):
             raise ValueError(f"Invalid format in line: '{line}'. Each line must contain exactly three columns: 'audio_file audio_name pic_name'.")
 
         audio_file, audio_name, pic_name = columns
-        if not audio_file.endswith(".mid") or not (pic_name.endswith(".png") or pic_name.endswith(".jpg")):
+        if not (audio_file.endswith(".mid") or audio_file.endswith(".midi")) or not (pic_name.endswith(".png") or pic_name.endswith(".jpg")):
             raise ValueError(f"Invalid file format in line: '{line}'. Audio file must end with '.mid' and image file must end with '.png' or '.jpg'.")
         
         if not audio_name.isalnum():
@@ -335,6 +335,8 @@ async def find_similar_midi(query_midi: UploadFile = File(...)):
 
 @app.post("/upload-mapper/")
 async def upload_mapper_file(file: UploadFile = File(...)):
+    global album_mapper, music_mapper
+     
     try:
         file_content = await file.read()
         file_content = file_content.decode("utf-8")  
@@ -344,6 +346,9 @@ async def upload_mapper_file(file: UploadFile = File(...)):
         with open(MAPPER_FILE_PATH, "w") as f:
             for line in valid_lines:
                 f.write(line)
+                
+        album_mapper = load_mapper_album(MAPPER_FILE)
+        music_mapper = load_mapper_music(MAPPER_FILE)
         
         return JSONResponse(content={"message": "Mapper file successfully uploaded and saved to 'mapper.txt'."})
     
