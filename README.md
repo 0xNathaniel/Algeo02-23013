@@ -42,6 +42,7 @@ Aplikasi ini mendukung berbagai format file gambar, audio, dan arsip seperti `.p
 2. **Download dependencies dengan menggunakan pip dan npm**:
    ```bash
    pip install -r pyrequirements.txt
+   npm install
    npm install axios
    npm install tone
 3. **Jalankan aplikasi FastAPI pada suatu terminal**:
