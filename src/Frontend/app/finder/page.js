@@ -172,7 +172,7 @@ const page = () => {
     }
 
     const formData = new FormData();
-    formData.append("files", mapperFile);
+    formData.append("file", mapperFile);
 
     try {
       await axios.post("http://localhost:8000/upload-mapper/", formData, {
