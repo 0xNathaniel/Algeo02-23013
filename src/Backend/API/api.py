@@ -104,12 +104,19 @@ def validate_mapper_format(file_content: str):
 def load_dataset_midis():
     global dataset_midis
     dataset_midis = []
+
     for filename in os.listdir(AUDIO_DIR):
         if filename.endswith(".mid") or filename.endswith(".midi"):
             file_path = os.path.join(AUDIO_DIR, filename)
             try:
                 midi_obj = MidiFile(file_path)
-                dataset_midis.append((filename, midi_obj))
+
+                has_channel_0 = any(msg.channel == 0 for track in midi_obj.tracks for msg in track if msg.type == 'note_on')
+
+                if has_channel_0:
+                    dataset_midis.append((filename, midi_obj))
+                else:
+                    print(f"Skipping {filename}: No channel 0 found.")
             except Exception as e:
                 print(f"Skipping {filename}: {e}")
 

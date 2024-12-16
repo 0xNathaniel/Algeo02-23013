@@ -37,42 +37,16 @@ def normalize_histogram_cumulative(histogram):
     
     return normalized_histogram
 
+import math
+
 def process_midi(midi_file, window_size=40, sliding_step=8):
-    melody_notes = []
-    time_accumulator = 0
-
-    tempo = 500000
-    for track in midi_file.tracks:
-        for msg in track:
-            if msg.type == 'set_tempo':
-                tempo = msg.tempo
-                break
-
-    ticks_per_beat = midi_file.ticks_per_beat
-
-    for track in midi_file.tracks:
-        for msg in track:
-            time_accumulator += msg.time * tempo / ticks_per_beat / 1e6
-            if not msg.is_meta and hasattr(msg, 'channel') and msg.channel == 0:
-                if msg.type == 'note_on' and msg.velocity > 0:
-                    melody_notes.append((msg.note, time_accumulator))
-
-    if not melody_notes:
-        raise ValueError("Tidak ada notasi yang ditemukan di Channel 0.")
-        
-    dev_notes_list = [x[0] for x in melody_notes]
-    dev_notes_list_mean = sum(dev_notes_list) / len(dev_notes_list)
-    dev_notes = math.sqrt(sum((x - dev_notes_list_mean) ** 2 for x in dev_notes_list) / len(dev_notes_list))
-
-    process_midi_result = []
-    for i in range(len(melody_notes)):
-        converted_notes = (melody_notes[i][0] - dev_notes_list_mean) / dev_notes
-        process_midi_result.append((converted_notes, melody_notes[i][1]))
-
-    if process_midi_result is None:
-        return [], 0, 0
-            
-    return process_midi_result, dev_notes_list_mean, dev_notes
+    dev_notes_list = [msg.note for msg in midi_file if msg.type == 'note_on' and msg.channel ==0]
+    
+    if len(dev_notes_list) == 0:
+        print("No notes available for deviation calculation.")
+        return []
+    else:
+        return dev_notes_list
 
 def find_active_channels(file_path):
     midi_file = mido.MidiFile(file_path)
